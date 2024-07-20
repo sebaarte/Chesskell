@@ -1,0 +1,1 @@
+test = map (\x -> if x == 5 then [1] else []) [1,2,3,4,5]
