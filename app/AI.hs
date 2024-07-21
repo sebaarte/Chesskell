@@ -18,6 +18,7 @@ pieceValue (Case Two Knight) = -3
 pieceValue (Case Two Bishop) = -3 
 pieceValue (Case Two Rook) = -5
 pieceValue (Case Two Queen) = -9
+pieceValue _ = 0
 
 fitnessFunction:: [Case] -> Int
 fitnessFunction (x:xs) = pieceValue x + fitnessFunction xs
