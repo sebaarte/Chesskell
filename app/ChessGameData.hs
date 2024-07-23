@@ -3,12 +3,14 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 
-module ChessGameData (ChessGameConfig(..),ChessGameState(..),initialBoard) where
+module ChessGameData (ChessGameConfig(..),ChessGameState(..),initialBoard,Command) where
 import Board
 import Move
 import Case
 import Player
 import Board
+
+type Command = String
 
 data ChessGameConfig = ChessGameConfig {pvp::Bool, playWhite::Bool}
 data ChessGameState = ChessGameState{board::Board,turn::Player,lastMove::Move}

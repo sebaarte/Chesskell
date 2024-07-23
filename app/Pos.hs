@@ -22,7 +22,7 @@ charToCol c = case c of
     'd' -> Just 3
     'e' -> Just 4
     'f' -> Just 5
-    'g' -> Just 6 
+    'g' -> Just 6
     'h' -> Just 7
     _ -> Nothing
 

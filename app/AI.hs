@@ -2,10 +2,12 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module AI() where
+module AI(getNextMove) where
 import Board
 import Case
 import Player
+import ChessGameData
+import Move
 
 pieceValue:: Case -> Int
 pieceValue (Case One Pawn) = 1
@@ -22,3 +24,7 @@ pieceValue _ = 0
 
 fitnessFunction:: [Case] -> Int
 fitnessFunction (x:xs) = pieceValue x + fitnessFunction xs
+
+
+getNextMove:: ChessGameState -> IO Command
+getNextMove state = putStr "Ai playing...\n" >> return ("a7a6")

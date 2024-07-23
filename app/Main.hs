@@ -22,14 +22,20 @@ import Player
 import Board
 import Case
 import ChessGameData
+import AI
 
 
 -- user input for a simple terminal-based game is just a single-line string
-type Command = String
+
 type ErrorMsg = String 
 
 promptForInput :: IO Command
 promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLine
+
+determineInput:: ChessGameState -> IO Command
+determineInput st@ChessGameState{board,turn}
+    | turn == One = promptForInput
+    | otherwise = getNextMove st
 
 -- We use a type s to represent a game state, where ...
 -- ... nextState computes the next game state, given the current state and next user input (may fail on invalid input)
@@ -44,11 +50,12 @@ class GameState s => TerminalGame s c | c -> s where
     initialState :: c -> Either ErrorMsg s
 
 -- run a game in the terminal
-runGame :: (Show s, TerminalGame s c) => c -> IO ()
+--runGame :: (Show s, TerminalGame s c) => c -> IO ()
 runGame = either error loop . initialState
     where loop st = do print st
                        unless (isFinalState st) $ do
-                            cmd <- promptForInput
+                            let tmp = determineInput st
+                            cmd <- tmp 
                             let nxt = nextState st cmd
                             either ((>> loop st) . putStrLn) loop nxt
 
