@@ -1,8 +1,8 @@
-module Player (passTurn,Player(..)) where
+module Player (nextPlayer,Player(..)) where
 
 data Player = One | Two | None deriving (Eq,Show)
-passTurn :: Player -> Player
-passTurn player
+nextPlayer :: Player -> Player
+nextPlayer player
     | player == One = Two
     | player == Two = One
     | otherwise = None

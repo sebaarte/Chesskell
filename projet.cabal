@@ -80,8 +80,9 @@ executable projet
                         MissingH^>=1.6.0.1
 
     -- Directories containing source files.
-    hs-source-dirs:   app,
-                        gui
+    hs-source-dirs: app,
+                    gui,
+                    AI
 
     -- Base language which the package is written in.
     default-language: GHC2021

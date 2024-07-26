@@ -55,7 +55,7 @@ linesFrom:: Board -> Pos -> Player -> [(Int,Int)]-> Int ->[Pos]
 linesFrom b@(Board board) p@(Pos col row) player directions 4 = concat (map (linesFrom b p player directions) [0..3])
 linesFrom b@(Board board) p@(Pos col row) player directions n = do
                                                          let newPos = modifyPos p (directions !! n)
-                                                         if (playerAt b p) == passTurn player
+                                                         if (playerAt b p) == nextPlayer player
                                                          then 
                                                             []
                                                          else 

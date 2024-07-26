@@ -70,7 +70,7 @@ noMove = (Move (Pos 0 0) (Pos 0 0))
 instance GameState ChessGameState where
     nextState state@ChessGameState{board,turn} input
         | isLeft move =  Left "Unable to parse move"
-        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (passTurn turn) (fromRight move))
+        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (nextPlayer turn) (fromRight move))
         | otherwise = Left "Invalid Move provided"
             where move = fromString input
     isFinalState state = isCheckmate state || isDraw state

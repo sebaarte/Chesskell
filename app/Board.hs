@@ -23,6 +23,9 @@ playerRow player =  (map (Case player) initialRow)
 
 newtype Board = Board [[Case]]
 
+instance Functor Board where
+     fmap f (Board b) = Board (map (map f) b)
+
 locateKingRow::  Player ->[Case] -> Int
 locateKingRow player row = let res = elemIndex (Case player King) row
                             in if isJust res then fromJust res else 10
