@@ -22,8 +22,11 @@ pieceValue (Case Two Rook) = 5
 pieceValue (Case Two Queen) = 9
 pieceValue _ = 0
 
+rowFitness:: [Case] -> Int
+rowFitness x = sum (map (pieceValue) x)
+
 fitnessFunction:: Board -> Int
-fitnessFunction (Board board) = fmap (pieceValue) board
+fitnessFunction (Board board) = sum (map rowFitness board)
 
 
 getNextMove:: ChessGameState -> IO Command

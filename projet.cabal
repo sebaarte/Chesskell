@@ -69,7 +69,8 @@ executable projet
                     Board,
                     ChessGameData,
                     Move,
-                    AI
+                    AI,
+                    MoveTree
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

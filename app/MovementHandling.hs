@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw) where
+module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves) where
 
 import Case
 import Pos
@@ -34,6 +34,7 @@ moveInBounds move@(Move (Pos fromCol fromRow) (Pos toCol toRow)) = all (==True) 
 
 isChecked:: ChessGameState -> Bool
 isChecked state@ChessGameState{board,turn,..} = (movesFrom state (locateKing board turn) turn) /= []
+
 
 
 -- checks for validity of a move in all possible cases
@@ -75,6 +76,12 @@ possibleMoves state@ChessGameState{board,turn,..} = let pieces = locateAllPlayer
 
 isCheckmate:: ChessGameState -> Bool
 isCheckmate state@ChessGameState{board,turn,..}= isChecked state && (possibleMoves state) == []
+
+
+
+isWinner:: Player -> Board -> Bool
+isWinner player board = isCheckmate ChessGameState{board,turn}
+                        where turn = nextPlayer player
 
 isDraw:: ChessGameState -> Bool
 isDraw state = (possibleMoves state) == []
