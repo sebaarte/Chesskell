@@ -52,7 +52,7 @@ extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-    ghc-options: 
+    ghc-options: -fwarn-unused-binds -threaded 
 
 executable projet
     -- Import common warning flags.

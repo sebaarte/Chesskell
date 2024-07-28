@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves) where
+module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner) where
 
 import Case
 import Pos
@@ -39,12 +39,12 @@ isChecked state@ChessGameState{board,turn,..} = (movesFrom state (locateKing boa
 
 -- checks for validity of a move in all possible cases
 isValidMove:: ChessGameState -> Move -> Bool
-isValidMove state@ChessGameState{board,turn,..} move@(Move from to) = do    let nextBoard = applyMove board move
-                                                                                res = moveInBounds move
-                                                                                        && (validCases state move)
-                                                                                        && (isPossibleDestination state move (at board from))
-                                                                                        && not (isChecked (ChessGameState nextBoard turn move)) 
-                                                                            res
+isValidMove state@ChessGameState{board,turn,moveHistory} move@(Move from to) = do   let nextBoard = applyMove board move
+                                                                                        res = moveInBounds move
+                                                                                            && (validCases state move)
+                                                                                            && (isPossibleDestination state move (at board from))
+                                                                                            && not (isChecked (ChessGameState nextBoard turn (moveHistory ++ [move]))) 
+                                                                                    res
                                                                     
 
 
@@ -79,8 +79,8 @@ isCheckmate state@ChessGameState{board,turn,..}= isChecked state && (possibleMov
 
 
 
-isWinner:: Player -> Board -> Bool
-isWinner player board = isCheckmate ChessGameState{board,turn}
+isWinner:: Player -> ChessGameState -> Bool
+isWinner player (ChessGameState board _ moveHistory) = isCheckmate ChessGameState{board,turn,moveHistory}
                         where turn = nextPlayer player
 
 isDraw:: ChessGameState -> Bool
@@ -89,14 +89,14 @@ isDraw state = (possibleMoves state) == []
 -- given a move and a case, assess the validity of the move based on movement possibilities alone (blocked by other pieces, limits of the board etc)
 isPossibleDestination:: ChessGameState -> Move -> Case -> Bool
 isPossibleDestination _ _ (Case None Empty) = False
-isPossibleDestination state@ChessGameState{board,turn,lastMove} move@(Move from@(Pos _ fromRow) to) (Case One Pawn) = case substract from to of
+isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case One Pawn) = case substract from to of
                                                                                 (0,1) -> at board to == (Case None Empty)
                                                                                 (1,1) -> playerAt board to == Two
                                                                                 (-1,1) -> playerAt board to == Two
                                                                                 (0,2) -> playerAt board to == None && playerAt board (fromJust (modifyPos from (0,1))) == None && fromRow == 1
                                                                                 _ -> False
 
-isPossibleDestination state@ChessGameState{board,turn,lastMove} move@(Move from@(Pos _ fromRow) to) (Case Two Pawn) = case substract from to of
+isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case Two Pawn) = case substract from to of
                                                                                 (0,-1) -> at board to == (Case None Empty)
                                                                                 (-1,-1) -> playerAt board to == One
                                                                                 (1,-1) -> playerAt board to == One

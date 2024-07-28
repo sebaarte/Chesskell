@@ -1,7 +1,6 @@
 
 
 Insufficient material
-IA
 Roque
 GUI
 Undo

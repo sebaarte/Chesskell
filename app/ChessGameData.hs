@@ -13,7 +13,7 @@ import Board
 type Command = String
 
 data ChessGameConfig = ChessGameConfig {pvp::Bool, playWhite::Bool}
-data ChessGameState = ChessGameState{board::Board,turn::Player,lastMove::Move}
+data ChessGameState = ChessGameState{board::Board,turn::Player,moveHistory::[Move]}
 
 initialBoard = Board ([playerRow One,pawnRow One] ++ replicate 4 emptyRow ++ [pawnRow Two,playerRow Two])
 emptyState = ChessGameState initialBoard One

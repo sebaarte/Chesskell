@@ -1,27 +1,44 @@
-module MoveTree() where
+module MoveTree(MoveTree(..),constructTree,getLastMove) where
 import Board
 import MovementHandling
 import ChessGameData
 import Player
 
 
-data MoveTree = Root ChessGameState | Leaf Board | Level Board [MoveTree]
+data MoveTree = Root ChessGameState | Leaf ChessGameState | Level ChessGameState [MoveTree]
+
+---------------------------------------------------
+
+leafFromMove:: ChessGameState -> Move -> MoveTree
+leafFromMove st@ChessGameState{board,turn,moveHistory} move = Leaf (ChessGameState (applyMove board move) (nextPlayer turn) (moveHistory ++ [move]))
 
 
-fromState:: ChessGameState -> MoveTree
-fromState st@ChessGameState{board,turn} =  Level board (map Leaf (map (applyMove board) (possibleMoves st)))
+levelFromState:: ChessGameState -> MoveTree
+levelFromState st@(ChessGameState board turn moveHistory) =  Level st (map (leafFromMove st) (possibleMoves st))
 
-fromBoardPlayer::Player -> Board -> MoveTree
-fromBoardPlayer turn board =  Level board (map Leaf (map (applyMove board) (possibleMoves ChessGameState{board,turn})))
+leavesFrom:: MoveTree -> [MoveTree]
+leavesFrom (Root st@ChessGameState{board,turn,moveHistory}) = let (Level _ leaves) = levelFromState st
+                                                                    in leaves
 
-fromBoard:: Board -> MoveTree
-fromBoard board = fromBoardPlayer Two board
+leavesFrom (Leaf st@ChessGameState{board,turn,moveHistory}) = let (Level _ leaves) = levelFromState st
+                                                                    in leaves
 
 
-constructTree:: MoveTree -> Int -> MoveTree
-constructTree st@ChessGameState{board,turn} 0 = 
 
-constructTree (Level (Board board) possibleStates) depth = 
+-- constructTree:: MoveTree -> Int -> MoveTree
+constructTree leaf@(Leaf st@ChessGameState{board,turn,moveHistory}) 0 = levelFromState st
 
-constructTree (Root st@ChessGameState{board,turn}) depth = 
+constructTree leaf@(Leaf st@ChessGameState{board,turn,moveHistory}) depth = let nextStates =  (leavesFrom leaf)
+                                                                            in 
+                                                                            Level st ( map (\x -> constructTree x (depth-1)) nextStates)
 
+
+constructTree root@(Root st@ChessGameState{board,turn,moveHistory}) depth = let nextStates =  (leavesFrom root)
+                                                                            in 
+                                                                            Level st ( map (\x -> constructTree x (depth-1)) nextStates)
+
+
+getLastMove:: MoveTree -> Move
+getLastMove (Root st@ChessGameState{board,turn,moveHistory}) = last moveHistory
+getLastMove (Leaf st@ChessGameState{board,turn,moveHistory}) = last moveHistory
+getLastMove (Level st@ChessGameState{board,turn,moveHistory} _) = last moveHistory
