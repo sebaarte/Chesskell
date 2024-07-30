@@ -11,7 +11,7 @@ cabal-version:      3.0
 --   http://haskell.org/cabal/users-guide/
 --
 -- The name of the package.
-name:               projet
+name:               Chesskell
 
 -- The package version.
 -- See the Haskell package versioning policy (PVP) for standards
@@ -20,7 +20,7 @@ name:               projet
 -- PVP summary:     +-+------- breaking API changes
 --                  | | +----- non-breaking API additions
 --                  | | | +--- code changes with no API change
-version:            0.1.0.0
+version:            0.1.0.1
 
 -- A short (one-line) description of the package.
 -- synopsis:
@@ -37,8 +37,6 @@ license-file:       LICENSE
 -- The package author(s).
 author:             sebaarte
 
--- An email address to which users can send suggestions, bug reports, and patches.
-maintainer:         sebastientv15@gmail.com
 
 -- A copyright notice.
 -- copyright:
@@ -52,7 +50,7 @@ extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
 common warnings
-    ghc-options: -fwarn-unused-binds -threaded 
+    ghc-options: -fwarn-unused-binds -threaded -O2 "-with-rtsopts= -N -s"
 
 executable projet
     -- Import common warning flags.
@@ -70,7 +68,8 @@ executable projet
                     ChessGameData,
                     Move,
                     AI,
-                    MoveTree
+                    MoveTree,
+                    MoveHistory
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -78,7 +77,11 @@ executable projet
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.17.2.1,
                         random^>=1.2.1.2,
-                        MissingH^>=1.6.0.1
+                        MissingH^>=1.6.0.1,
+                        parallel^>=3.2.2.0,
+                        time,
+                        timeit,
+                        deepseq
 
     -- Directories containing source files.
     hs-source-dirs: app,

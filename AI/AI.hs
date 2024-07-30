@@ -45,7 +45,7 @@ fitnessFunction st@(ChessGameState (Board board) _ _) = if isWinner Two st
                                                     else sum (map (rowFitness) board)
 
 getNextMove:: ChessGameState -> IO Command
-getNextMove state = putStr "Ai playing...\n" >> trace ("AI played: " ++ move) return move where move = (fromJust (toString (extractBestMove state)))
+getNextMove state = putStr "Ai playing...\n" >> putStr ("AI played: " ++ move) >> return move where move = (fromJust (toString (extractBestMove state)))
 
 
 extractBestMove:: ChessGameState -> Move

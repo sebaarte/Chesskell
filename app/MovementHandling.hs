@@ -7,8 +7,9 @@ import Case
 import Pos
 import Board
 import Player
-import ChessGameData (ChessGameState(..))
+import ChessGameData
 import Move
+import MoveHistory
 
 import Debug.Trace (trace)
 import Data.Maybe(fromJust,isJust)
@@ -43,7 +44,7 @@ isValidMove state@ChessGameState{board,turn,moveHistory} move@(Move from to) = d
                                                                                         res = moveInBounds move
                                                                                             && (validCases state move)
                                                                                             && (isPossibleDestination state move (at board from))
-                                                                                            && not (isChecked (ChessGameState nextBoard turn (moveHistory ++ [move]))) 
+                                                                                            && not (isChecked (ChessGameState nextBoard turn (appendMove moveHistory board move))) 
                                                                                     res
                                                                     
 

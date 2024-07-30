@@ -14,7 +14,8 @@ import Text.ParserCombinators.ReadP (string)
 import Control.Applicative (Alternative(empty))
 import Data.Either (isLeft,isRight)
 import Data.Either.Utils(fromRight)
-
+import System.TimeIt
+import System.Exit
 
 import Pos
 import MovementHandling
@@ -23,6 +24,7 @@ import Board
 import Case
 import ChessGameData
 import AI
+import MoveHistory
 
 
 -- user input for a simple terminal-based game is just a single-line string
@@ -34,8 +36,8 @@ promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLin
 
 determineInput:: ChessGameState -> IO Command
 determineInput st@ChessGameState{board,turn}
-    | turn == One = promptForInput
-    | otherwise = getNextMove st
+    | turn == One = return "a2a4"
+    | otherwise = getNextMove st >> exitFailure
 
 -- We use a type s to represent a game state, where ...
 -- ... nextState computes the next game state, given the current state and next user input (may fail on invalid input)
@@ -64,20 +66,20 @@ runGame = either error loop . initialState
 -- Chess Game
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-noMove = (Move (Pos 0 0) (Pos 0 0))
+
 
 
 instance GameState ChessGameState where
     nextState state@ChessGameState{board,turn,moveHistory} input
         | isLeft move =  Left "Unable to parse move"
-        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (nextPlayer turn) (moveHistory ++ [(fromRight move)]))
+        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (nextPlayer turn) (appendMove moveHistory board (fromRight move)))
         | otherwise = Left "Invalid Move provided"
             where move = fromString input
     isFinalState state = isCheckmate state || isDraw state
                
     
 instance TerminalGame ChessGameState ChessGameConfig where
-    initialState ChessGameConfig{..} = Right (ChessGameState initialBoard One [])
+    initialState ChessGameConfig{..} = Right (ChessGameState initialBoard One (MoveHistory [] []))
     
 
 

@@ -4,7 +4,10 @@ import Data.Char (digitToInt)
 import Data.Maybe(fromJust,isJust)
 import Debug.Trace(trace)
 
-data Move = Move{from::Pos, to::Pos} deriving (Eq,Show)
+data Move = Move{from::Pos, to::Pos} | CastleMove Bool Bool deriving (Eq,Show)
+
+
+
 
 
 

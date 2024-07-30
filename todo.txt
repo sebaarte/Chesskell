@@ -1,8 +1,13 @@
 
-
-Insufficient material
 Roque
+en passant
+Insufficient material
+choose between white and black (+ flip board)
+
 GUI
 Undo
-Threading IA
+Threading IA (+-)
 SAVE/LOAD (file format)
+
+
+keep part of move tree (optional)
