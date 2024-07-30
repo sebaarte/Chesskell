@@ -36,8 +36,8 @@ promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLin
 
 determineInput:: ChessGameState -> IO Command
 determineInput st@ChessGameState{board,turn}
-    | turn == One = return "a2a4"
-    | otherwise = getNextMove st >> exitFailure
+    | turn == One = promptForInput
+    | otherwise = getNextMove st
 
 -- We use a type s to represent a game state, where ...
 -- ... nextState computes the next game state, given the current state and next user input (may fail on invalid input)

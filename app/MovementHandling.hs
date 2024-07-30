@@ -20,10 +20,25 @@ replace::[a] -> Int -> a -> [a]
 replace l n val = take n l ++ val : drop (n+1) l
 
 
--- move a piece from position "from" to position "to"
+replaceInBoard:: Board -> Pos -> Case -> Board
+replaceInBoard b@(Board board) pos@(Pos col row) c@(Case player piece) = Board (replace board row (replace (board !! row) col c))
+
+multipleReplace:: Board -> [(Pos,Case)] -> Board
+multipleReplace b@(Board board) [] = b
+multipleReplace b@(Board board) (x:xs) = multipleReplace (replaceInBoard b (fst x) (snd x)) xs
+
+-- move a piece from position "from" to position "to" leaving an empty case in the "from" position
 applyMove:: Board -> Move -> Board
-applyMove b@(Board board) (Move from@(Pos fromCol fromRow) to@(Pos toCol toRow)) = Board (replace tempBoard fromRow (replace (tempBoard !! fromRow) fromCol (Case None Empty)))
-    where tempBoard = replace board toRow (replace (board !! toRow) toCol (potentialPromotion toRow (at b from)))
+applyMove b@(Board board) (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  case (toCol,(at b from)) of
+                                                                                (6,(Case One King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case One King)),((Pos 5 0),(Case One Rook)),((Pos 7 0),(Case None Empty) )]
+                                                                                (2,(Case One King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case One King) ),((Pos 3 0),(Case One Rook) ),((Pos 0 0),(Case None Empty) )]
+                                                                                (6,(Case Two King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Two King) ),((Pos 5 7),(Case Two Rook) ),((Pos 7 7),(Case None Empty) )]
+                                                                                (2,(Case Two King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Two King) ),((Pos 3 7),(Case Two Rook) ),((Pos 0 7),(Case None Empty) )]
+                                                                                _ -> replaceInBoard tempBoard from (Case None Empty) 
+                                                                                        where tempBoard = replaceInBoard b to (at b from)
+
+applyMove b@(Board board) (Move from@(Pos fromCol fromRow) to@(Pos toCol toRow)) = replaceInBoard tempBoard from (Case None Empty) 
+    where tempBoard = replaceInBoard b to (at b from)
 
 -- returns False if the piece to be moved is not belonging to the current player or if the destination already contains another piece of the current player
 validCases:: ChessGameState -> Move -> Bool
@@ -87,7 +102,7 @@ isWinner player (ChessGameState board _ moveHistory) = isCheckmate ChessGameStat
 isDraw:: ChessGameState -> Bool
 isDraw state = (possibleMoves state) == []
 
--- given a move and a case, assess the validity of the move based on movement possibilities alone (blocked by other pieces, limits of the board etc)
+-- given a move and a case, assess the validity of the move based on movement possibilities and special rules (blocked by other pieces,en passant, castling etc)
 isPossibleDestination:: ChessGameState -> Move -> Case -> Bool
 isPossibleDestination _ _ (Case None Empty) = False
 isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case One Pawn) = case substract from to of
@@ -117,6 +132,20 @@ isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case p
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player Bishop) = elem to (linesFrom board from player diagonals 4)
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player Rook) = elem to (linesFrom board from player cardinals 4)
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player Queen) = elem to ((linesFrom board from player cardinals 4) ++ (linesFrom board from player diagonals 4))
-isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player King) = elem (Just to) (map (modifyPos from) (cardinals ++ diagonals))
+isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player King) = elem (Just to) (map (modifyPos from) (cardinals ++ diagonals)) || isCastleMovePossible state move
+
+
+
+isCastleMovePossible:: ChessGameState -> Move -> Bool
+isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) = (at board (Pos 5 toRow)) == (Case None Empty)  
+                                                                                && (at board (Pos 6 toRow)) == (Case None Empty) 
+                                                                                && not (hasKingMoved moveHistory turn) && not (hasKingSideRookMoved moveHistory board turn)
+                                                                                && not (isChecked st)
+
+isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 2 toRow)) = (at board (Pos 3 toRow)) == (Case None Empty) 
+                                                                                && (at board (Pos 2 toRow)) == (Case None Empty) 
+                                                                                && not (hasKingMoved moveHistory turn) && not (hasQueenSideRookMoved moveHistory board turn)
+                                                                                && not (isChecked st)
+isCastleMovePossible _ _ = False
 
 

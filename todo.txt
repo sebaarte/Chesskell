@@ -1,4 +1,3 @@
-
 Roque
 en passant
 Insufficient material
@@ -11,3 +10,7 @@ SAVE/LOAD (file format)
 
 
 keep part of move tree (optional)
+
+
+make board a type and not a data (optional)
+change move generation
