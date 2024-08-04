@@ -4,6 +4,7 @@
 module Main (ErrorMsg,main) where
 
 import Data.Char (isAlphaNum)
+import Data.Maybe(fromJust,isJust)
 import Debug.Trace(trace)
 import Control.Monad (unless)
 import Text.Read (readEither)
@@ -16,6 +17,9 @@ import Data.Either (isLeft,isRight)
 import Data.Either.Utils(fromRight)
 import System.TimeIt
 import System.Exit
+import System.Environment   
+import Data.List
+import System.Directory
 
 import Pos
 import MovementHandling
@@ -25,6 +29,7 @@ import Case
 import ChessGameData
 import AI
 import MoveHistory
+import GrammarReader
 
 
 -- user input for a simple terminal-based game is just a single-line string
@@ -36,7 +41,7 @@ promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLin
 
 determineInput:: ChessGameState -> IO Command
 determineInput st@ChessGameState{board,turn}
-    | turn == One = promptForInput
+    | turn == White = promptForInput
     | otherwise = getNextMove st
 
 -- We use a type s to represent a game state, where ...
@@ -79,9 +84,14 @@ instance GameState ChessGameState where
                
     
 instance TerminalGame ChessGameState ChessGameConfig where
-    initialState ChessGameConfig{..} = Right (ChessGameState initialBoard One (MoveHistory [] []))
+    initialState ChessGameConfig{..} = if doesFileExist fileName then parseChessFile fileName else Right (ChessGameState initialBoard White )
+
     
 
 
 
-main = runGame (ChessGameConfig True True)
+main = do
+        args <- getArgs
+        if length args < 1 then error "Program needs at least one argument"
+        else runGame (ChessGameConfig True True (args !! 0))
+        

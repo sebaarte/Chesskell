@@ -69,7 +69,8 @@ executable projet
                     Move,
                     AI,
                     MoveTree,
-                    MoveHistory
+                    MoveHistory,
+                    GrammarReader
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -81,7 +82,7 @@ executable projet
                         parallel^>=3.2.2.0,
                         time,
                         timeit,
-                        deepseq
+                        directory
 
     -- Directories containing source files.
     hs-source-dirs: app,

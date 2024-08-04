@@ -1,4 +1,7 @@
-module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?)) where
+module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),fromStr) where
+import Data.Maybe(fromJust,isJust)
+
+
 -- Represents a position on the chessboard
 data Pos = Pos Int Int deriving (Eq,Show)
 
@@ -38,3 +41,8 @@ colToChar n = case n of
     6 -> Just 'g'
     7 -> Just 'h'
     _ -> Nothing
+
+fromStr:: String -> Maybe Pos
+fromStr s@(a:b:_) = if isJust col && length s == 2 then Just (Pos (fromJust col) (read [b]))
+                    else Nothing
+                    where col = charToCol a

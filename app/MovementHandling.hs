@@ -30,10 +30,10 @@ multipleReplace b@(Board board) (x:xs) = multipleReplace (replaceInBoard b (fst 
 -- move a piece from position "from" to position "to" leaving an empty case in the "from" position
 applyMove:: Board -> Move -> Board
 applyMove b@(Board board) (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  case (toCol,(at b from)) of
-                                                                                (6,(Case One King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case One King)),((Pos 5 0),(Case One Rook)),((Pos 7 0),(Case None Empty) )]
-                                                                                (2,(Case One King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case One King) ),((Pos 3 0),(Case One Rook) ),((Pos 0 0),(Case None Empty) )]
-                                                                                (6,(Case Two King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Two King) ),((Pos 5 7),(Case Two Rook) ),((Pos 7 7),(Case None Empty) )]
-                                                                                (2,(Case Two King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Two King) ),((Pos 3 7),(Case Two Rook) ),((Pos 0 7),(Case None Empty) )]
+                                                                                (6,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King)),((Pos 5 0),(Case White Rook)),((Pos 7 0),(Case None Empty) )]
+                                                                                (2,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King) ),((Pos 3 0),(Case White Rook) ),((Pos 0 0),(Case None Empty) )]
+                                                                                (6,(Case Black King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 5 7),(Case Black Rook) ),((Pos 7 7),(Case None Empty) )]
+                                                                                (2,(Case Black King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 3 7),(Case Black Rook) ),((Pos 0 7),(Case None Empty) )]
                                                                                 _ -> replaceInBoard tempBoard from (Case None Empty) 
                                                                                         where tempBoard = replaceInBoard b to (at b from)
 
@@ -105,17 +105,17 @@ isDraw state = (possibleMoves state) == []
 -- given a move and a case, assess the validity of the move based on movement possibilities and special rules (blocked by other pieces,en passant, castling etc)
 isPossibleDestination:: ChessGameState -> Move -> Case -> Bool
 isPossibleDestination _ _ (Case None Empty) = False
-isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case One Pawn) = case substract from to of
+isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case White Pawn) = case substract from to of
                                                                                 (0,1) -> at board to == (Case None Empty)
-                                                                                (1,1) -> playerAt board to == Two
-                                                                                (-1,1) -> playerAt board to == Two
+                                                                                (1,1) -> playerAt board to == Black
+                                                                                (-1,1) -> playerAt board to == Black
                                                                                 (0,2) -> playerAt board to == None && playerAt board (fromJust (modifyPos from (0,1))) == None && fromRow == 1
                                                                                 _ -> False
 
-isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case Two Pawn) = case substract from to of
+isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case Black Pawn) = case substract from to of
                                                                                 (0,-1) -> at board to == (Case None Empty)
-                                                                                (-1,-1) -> playerAt board to == One
-                                                                                (1,-1) -> playerAt board to == One
+                                                                                (-1,-1) -> playerAt board to == White
+                                                                                (1,-1) -> playerAt board to == White
                                                                                 (0,-2) -> playerAt board to == None && playerAt board (fromJust (modifyPos from (0,-1))) == None && fromRow == 6
                                                                                 _ -> False
 

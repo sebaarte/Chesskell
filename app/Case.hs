@@ -15,27 +15,27 @@ data Case = Case {player::Player, piece::Piece} deriving Eq
 instance Show Case where
     show Case {piece = Empty, ..} = " ·"
     show Case {piece = Pawn,player}
-        | player == One = " p"
+        | player == White = " p"
         | otherwise = " P"
     show Case {piece = Rook,player}
-        | player == One = " r"
+        | player == White = " r"
         | otherwise = " R"
     show Case {piece = Knight,player}
-        | player == One = " n"
+        | player == White = " n"
         | otherwise = " N"
     show Case {piece = Bishop,player}
-        | player == One = " b"
+        | player == White = " b"
         | otherwise = " B"
     show Case {piece = Queen,player}
-        | player == One = " q"
+        | player == White = " q"
         | otherwise = " Q"
     show Case {piece = King,player}
-        | player == One = " k"
+        | player == White = " k"
         | otherwise = " K"
 
 fromChar:: Char -> Case
-fromChar '_' = Case One Empty
+fromChar '_' = Case White Empty
 
 -- checks for promotion eligibility and promotes if relevant
 potentialPromotion:: Int -> Case -> Case
-potentialPromotion row c@(Case player piece) = if (row == 7 && player == One && piece == Pawn) || (row == 0 && player == Two && piece == Pawn) then (Case player Queen) else c
+potentialPromotion row c@(Case player piece) = if (row == 7 && player == White && piece == Pawn) || (row == 0 && player == Black && piece == Pawn) then (Case player Queen) else c

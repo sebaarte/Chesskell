@@ -20,10 +20,10 @@ hasKingMoved (MoveHistory moves cases) player = not (elem (Case player King) fro
 
 
 hasKingSideRookMoved:: MoveHistory -> Board -> Player -> Bool
-hasKingSideRookMoved (MoveHistory moves cases) board One = not (elem (Pos 0 7) fromMoves) && (at board (Pos 0 7)) /= (Case One Rook) where fromMoves = map from moves
-hasKingSideRookMoved (MoveHistory moves cases) board Two = not (elem (Pos 7 0) fromMoves) && (at board (Pos 7 0)) /= (Case Two Rook) where fromMoves = map from moves
+hasKingSideRookMoved (MoveHistory moves cases) board White = not (elem (Pos 0 7) fromMoves) && (at board (Pos 0 7)) /= (Case White Rook) where fromMoves = map from moves
+hasKingSideRookMoved (MoveHistory moves cases) board Black = not (elem (Pos 7 0) fromMoves) && (at board (Pos 7 0)) /= (Case Black Rook) where fromMoves = map from moves
 
 
 hasQueenSideRookMoved:: MoveHistory -> Board -> Player -> Bool
-hasQueenSideRookMoved (MoveHistory moves cases) board One = not (elem (Pos 0 0) fromMoves) && (at board (Pos 0 0)) /= (Case One Rook) where fromMoves = map from moves
-hasQueenSideRookMoved (MoveHistory moves cases) board Two = not (elem (Pos 7 7) fromMoves) && (at board (Pos 7 7)) /= (Case Two Rook) where fromMoves = map from moves
+hasQueenSideRookMoved (MoveHistory moves cases) board White = not (elem (Pos 0 0) fromMoves) && (at board (Pos 0 0)) /= (Case White Rook) where fromMoves = map from moves
+hasQueenSideRookMoved (MoveHistory moves cases) board Black = not (elem (Pos 7 7) fromMoves) && (at board (Pos 7 7)) /= (Case Black Rook) where fromMoves = map from moves

@@ -16,31 +16,31 @@ import MoveTree
 import MovementHandling
 
 pieceValue:: Case -> Int
-pieceValue (Case One Pawn) = -1
-pieceValue (Case One Knight) = -3 
-pieceValue (Case One Bishop) = -3 
-pieceValue (Case One Rook) = -5
-pieceValue (Case One Queen) = -9
-pieceValue (Case Two Pawn) = 1
-pieceValue (Case Two Knight) = 3 
-pieceValue (Case Two Bishop) = 3 
-pieceValue (Case Two Rook) = 5
-pieceValue (Case Two Queen) = 9
+pieceValue (Case White Pawn) = -1
+pieceValue (Case White Knight) = -3 
+pieceValue (Case White Bishop) = -3 
+pieceValue (Case White Rook) = -5
+pieceValue (Case White Queen) = -9
+pieceValue (Case Black Pawn) = 1
+pieceValue (Case Black Knight) = 3 
+pieceValue (Case Black Bishop) = 3 
+pieceValue (Case Black Rook) = 5
+pieceValue (Case Black Queen) = 9
 pieceValue _ = 0
 
 customMaximum:: [Int] ->Int -> Player -> Int
 customMaximum [] def _ = def
-customMaximum xs _ Two = maximum xs
-customMaximum xs _ One = minimum xs
+customMaximum xs _ Black = maximum xs
+customMaximum xs _ White = minimum xs
 
 rowFitness:: [Case] -> Int
 rowFitness x = sum (map (pieceValue) x)
 
 fitnessFunction:: ChessGameState-> Int
-fitnessFunction st@(ChessGameState (Board board) _ _) = if isWinner Two st
+fitnessFunction st@(ChessGameState (Board board) _ _) = if isWinner Black st
                                                 then 100000000  -- arbitrarily big number
                                                 else 
-                                                    if isWinner One st
+                                                    if isWinner White st
                                                     then -100000000
                                                     else sum (map (rowFitness) board)
 

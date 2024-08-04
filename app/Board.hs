@@ -38,7 +38,7 @@ locateAllPlayerPieces:: Board -> Player -> [Pos]
 locateAllPlayerPieces board player = filter (\x -> (playerAt board x) == player) allPositions
 
 allPieces::Board -> [Pos]
-allPieces board = locateAllPlayerPieces board One ++ locateAllPlayerPieces board Two
+allPieces board = locateAllPlayerPieces board White ++ locateAllPlayerPieces board Black
 
 piecesInGame:: Board -> [Case]
 piecesInGame board = map (at board) (allPieces board)
