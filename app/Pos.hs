@@ -1,4 +1,4 @@
-module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),fromStr) where
+module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),fromStr,isPosBlack) where
 import Data.Maybe(fromJust,isJust)
 
 
@@ -46,3 +46,7 @@ fromStr:: String -> Maybe Pos
 fromStr s@(a:b:_) = if isJust col && length s == 2 then Just (Pos (fromJust col) (read [b]))
                     else Nothing
                     where col = charToCol a
+
+isPosBlack:: Pos -> Bool
+isPosBlack (Pos col row) = even (col+row)
+

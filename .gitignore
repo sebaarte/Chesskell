@@ -4,3 +4,6 @@ dist-newstyle/
 *.h
 *.exe
 test.hs
+*.local
+LICENSE
+*.pdf

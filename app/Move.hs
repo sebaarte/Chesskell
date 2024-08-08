@@ -19,7 +19,7 @@ fromString cmd@(a:b:c:d:_) = if isJust aa && isJust cc
     then 
       Right (Move (Pos (fromJust aa) ((digitToInt b)-1)) (Pos (fromJust cc) ((digitToInt d)-1)))
     else
-      trace (show a ++ " " ++ show c) (Left "Unable to parse command into valid move")
+      (Left "Unable to parse command into valid move")
       where aa = charToCol a
             cc = charToCol c
 fromString _ = Left "Unknown data formatting"

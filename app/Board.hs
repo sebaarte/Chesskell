@@ -1,4 +1,4 @@
-module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame) where
+module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame,boardToString,allPieces,emptyBoard) where
 
 import Case
 import Player
@@ -17,11 +17,12 @@ allPositions = [ (Pos x y) | x <- [0..7], y <- [0..7]]
     
 
 emptyRow = replicate 8 (Case None Empty)
+emptyBoard = replicate 8 emptyRow
 
 pawnRow player =  replicate 8 (Case player Pawn)
 playerRow player =  (map (Case player) initialRow)
 
-newtype Board = Board [[Case]]
+type Board = [[Case]]
 
 
 locateKingRow::  Player ->[Case] -> Int
@@ -30,7 +31,7 @@ locateKingRow player row = let res = elemIndex (Case player King) row
                            
 
 locateKing:: Board -> Player -> Pos
-locateKing (Board board) player = let res = map (locateKingRow player) board
+locateKing board player = let res = map (locateKingRow player) board
                                      in Pos (fromJust(find (/=10) res)) (fromJust(findIndex (/=10) res))
 
 
@@ -44,11 +45,18 @@ piecesInGame:: Board -> [Case]
 piecesInGame board = map (at board) (allPieces board)
 
 rowAt::Board -> Pos -> [Case]
-rowAt (Board board) (Pos _ row) = board !! row
+rowAt board (Pos _ row) = board !! row
 
 at::Board -> Pos -> Case
-at b@(Board board) m@(Pos col row) = let cases = rowAt b m in cases !! col
+at board m@(Pos col row) = let cases = rowAt board m in cases !! col
 
 playerAt:: Board -> Pos -> Player
 playerAt board pos = player where (Case player _ ) = at board pos
 
+
+
+strRow x = unwords (map show x)
+
+boardToString:: Board -> String
+boardToString b = unlines (zipWith (++) leftMargin board)
+                        where (leftMargin,board) = (map ((++ " |") . show) (reverse [1 .. 8]) , map strRow (reverse b))

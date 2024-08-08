@@ -4,7 +4,7 @@
 
 
 
-module ChessGameData (ChessGameConfig(..),ChessGameState(..),initialBoard,Command) where
+module ChessGameData (ChessGameConfig(..),ChessGameState(..),initialBoard,Command,defaultInitialState) where
 import Board
 import Move
 import Case
@@ -17,17 +17,18 @@ type Command = String
 data ChessGameConfig = ChessGameConfig {pvp::Bool, playWhite::Bool,fileName::FilePath}
 data ChessGameState = ChessGameState{board::Board,turn::Player,moveHistory::MoveHistory}
 
-initialBoard = Board ([playerRow White,pawnRow White] ++ replicate 4 emptyRow ++ [pawnRow Black,playerRow Black])
+initialBoard = [playerRow White,pawnRow White] ++ replicate 4 emptyRow ++ [pawnRow Black,playerRow Black]
+defaultInitialState = (ChessGameState initialBoard White (MoveHistory [] []))
 
 
 
-strRow x = unwords (map show x)
 
-instance Show Board where
-        show (Board x) = unlines (zipWith (++) leftMargin board)
-            where (leftMargin,board) = (map ((++ " |") . show) (reverse [1 .. 8]) , map strRow (reverse x))
+
+
+        
 
 instance Show ChessGameState where
-    show ChessGameState{board,turn} = show board ++ "--+-----------------------\n  | A  B  C  D  E  F  G  H\nPlayer " ++ show turn ++ " turn" 
-
+    show ChessGameState{board,turn} | turn == White = boardToString board ++ "--+-----------------------\n  | A  B  C  D  E  F  G  H\n" ++ show turn ++ " turn" 
+                                    | otherwise = tmp ++ "--+-----------------------\n  | A  B  C  D  E  F  G  H\n" ++ show turn ++ " turn" 
+                                        where tmp = unlines (reverse (lines (boardToString board)))
 

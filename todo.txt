@@ -1,16 +1,16 @@
-Roque
-en passant
-Insufficient material
-choose between white and black (+ flip board)
+PARTIE 1
 
+en passant
+make AI choose randomly between equal moves
+
+keep part of move tree (optional)
+
+PARTIE 2
+change move history encoding
+change move generation
 GUI
 Undo
 Threading IA (+-)
 SAVE/LOAD (file format)
 
 
-keep part of move tree (optional)
-
-
-make board a type and not a data (optional)
-change move generation

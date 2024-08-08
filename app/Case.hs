@@ -3,7 +3,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 
-module Case (fromChar,potentialPromotion,Piece(..),Case(..)) where
+module Case (fromChar,potentialPromotion,Piece(..),Case(..),arePiecesDifferent) where
 import Player
 
 data Piece = Empty | Pawn | Rook | Knight | Bishop | Queen | King deriving Eq
@@ -39,3 +39,6 @@ fromChar '_' = Case White Empty
 -- checks for promotion eligibility and promotes if relevant
 potentialPromotion:: Int -> Case -> Case
 potentialPromotion row c@(Case player piece) = if (row == 7 && player == White && piece == Pawn) || (row == 0 && player == Black && piece == Pawn) then (Case player Queen) else c
+
+arePiecesDifferent:: Case -> Case -> Bool
+arePiecesDifferent (Case _ piece1) (Case _ piece2) = piece1 /= piece2 

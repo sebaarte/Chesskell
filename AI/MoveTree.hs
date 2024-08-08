@@ -14,7 +14,7 @@ data MoveTree = Root ChessGameState | Leaf ChessGameState | Level ChessGameState
 ---------------------------------------------------
 
 leafFromMove:: ChessGameState -> Move -> MoveTree
-leafFromMove st@ChessGameState{board,turn,moveHistory} move = Leaf (ChessGameState (applyMove board move) (nextPlayer turn) (appendMove moveHistory board move))
+leafFromMove st@ChessGameState{board,turn,moveHistory} move = Leaf (ChessGameState (applyMove board move) (otherPlayer turn) (appendMove moveHistory board move))
 
 
 --levelFromState:: ChessGameState -> MoveTree
@@ -41,7 +41,7 @@ constructTree leaf@(Leaf st@ChessGameState{board,turn,moveHistory}) depth = let 
 constructTree root@(Root st@ChessGameState{board,turn,moveHistory}) depth = let nextStates =  (leavesFrom root)
                                                                             in 
                                                                             --Level st ( parMap rpar (\x -> constructTree x (depth-1)) nextStates)
-                                                                            trace ( show (length nextStates)) Level st (( map (\x -> constructTree x (depth-1)) nextStates) `using` parListChunk 100 rpar)
+                                                                            Level st (( map (\x -> constructTree x (depth-1)) nextStates) `using` parListChunk 100 rpar)
 
 
 getLastMove:: MoveTree -> Move

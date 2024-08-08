@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner) where
+module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner,multipleReplace) where
 
 import Case
 import Pos
@@ -21,15 +21,15 @@ replace l n val = take n l ++ val : drop (n+1) l
 
 
 replaceInBoard:: Board -> Pos -> Case -> Board
-replaceInBoard b@(Board board) pos@(Pos col row) c@(Case player piece) = Board (replace board row (replace (board !! row) col c))
+replaceInBoard board pos@(Pos col row) c@(Case player piece) = replace board row (replace (board !! row) col c)
 
 multipleReplace:: Board -> [(Pos,Case)] -> Board
-multipleReplace b@(Board board) [] = b
-multipleReplace b@(Board board) (x:xs) = multipleReplace (replaceInBoard b (fst x) (snd x)) xs
+multipleReplace b [] = b
+multipleReplace b (x:xs) = multipleReplace (replaceInBoard b (fst x) (snd x)) xs
 
 -- move a piece from position "from" to position "to" leaving an empty case in the "from" position
 applyMove:: Board -> Move -> Board
-applyMove b@(Board board) (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  case (toCol,(at b from)) of
+applyMove b (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  case (toCol,(at b from)) of
                                                                                 (6,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King)),((Pos 5 0),(Case White Rook)),((Pos 7 0),(Case None Empty) )]
                                                                                 (2,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King) ),((Pos 3 0),(Case White Rook) ),((Pos 0 0),(Case None Empty) )]
                                                                                 (6,(Case Black King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 5 7),(Case Black Rook) ),((Pos 7 7),(Case None Empty) )]
@@ -37,8 +37,8 @@ applyMove b@(Board board) (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  ca
                                                                                 _ -> replaceInBoard tempBoard from (Case None Empty) 
                                                                                         where tempBoard = replaceInBoard b to (at b from)
 
-applyMove b@(Board board) (Move from@(Pos fromCol fromRow) to@(Pos toCol toRow)) = replaceInBoard tempBoard from (Case None Empty) 
-    where tempBoard = replaceInBoard b to (at b from)
+applyMove b (Move from@(Pos fromCol fromRow) to@(Pos toCol toRow)) = replaceInBoard tempBoard from (Case None Empty) 
+    where tempBoard = replaceInBoard b to (potentialPromotion toRow (at b from))
 
 -- returns False if the piece to be moved is not belonging to the current player or if the destination already contains another piece of the current player
 validCases:: ChessGameState -> Move -> Bool
@@ -69,10 +69,10 @@ diagonals = [(1,1),(-1,1),(1,-1),(-1,-1)]
 cardinals = [(1,0),(0,1),(-1,0),(0,-1)]
 
 linesFrom:: Board -> Pos -> Player -> [(Int,Int)]-> Int ->[Pos]
-linesFrom b@(Board board) p@(Pos col row) player directions 4 = concat (map (linesFrom b p player directions) [0..3])
-linesFrom b@(Board board) p@(Pos col row) player directions n = do
+linesFrom b p@(Pos col row) player directions 4 = concat (map (linesFrom b p player directions) [0..3])
+linesFrom b p@(Pos col row) player directions n = do
                                                          let newPos = modifyPos p (directions !! n)
-                                                         if (playerAt b p) == nextPlayer player
+                                                         if (playerAt b p) == otherPlayer player
                                                          then 
                                                             []
                                                          else 
@@ -97,18 +97,32 @@ isCheckmate state@ChessGameState{board,turn,..}= isChecked state && (possibleMov
 
 isWinner:: Player -> ChessGameState -> Bool
 isWinner player (ChessGameState board _ moveHistory) = isCheckmate ChessGameState{board,turn,moveHistory}
-                        where turn = nextPlayer player
+                        where turn = otherPlayer player
 
 isDraw:: ChessGameState -> Bool
-isDraw state = (possibleMoves state) == []
+isDraw state = isStalemate state || isMaterialInsufficient state
+
+isStalemate:: ChessGameState -> Bool
+isStalemate state = (possibleMoves state) == [] 
+
+isMaterialInsufficient:: ChessGameState -> Bool
+isMaterialInsufficient state@ChessGameState{board,turn,moveHistory} =   let positions = (allPieces board)
+                                                                            noKings = filter (\x -> arePiecesDifferent (Case None King) (at board x)) positions
+                                                                            cases = map (at board) noKings
+                                                                        in
+                                                                        case length noKings of
+                                                                        0 -> True
+                                                                        1 -> elem (Case White Bishop) cases || elem (Case Black Bishop) cases || elem (Case White Knight) cases || elem (Case Black Knight) cases
+                                                                        2 -> elem (Case White Bishop) cases && elem (Case Black Bishop) cases && (isPosBlack (noKings !! 0) == isPosBlack (noKings !! 1))
+                                                                        _ -> False
 
 -- given a move and a case, assess the validity of the move based on movement possibilities and special rules (blocked by other pieces,en passant, castling etc)
 isPossibleDestination:: ChessGameState -> Move -> Case -> Bool
 isPossibleDestination _ _ (Case None Empty) = False
 isPossibleDestination state@ChessGameState{board,turn,moveHistory} move@(Move from@(Pos _ fromRow) to) (Case White Pawn) = case substract from to of
                                                                                 (0,1) -> at board to == (Case None Empty)
-                                                                                (1,1) -> playerAt board to == Black
-                                                                                (-1,1) -> playerAt board to == Black
+                                                                                (1,1) -> playerAt board to == Black || isEnPassantPossible state move
+                                                                                (-1,1) -> playerAt board to == Black || isEnPassantPossible state move
                                                                                 (0,2) -> playerAt board to == None && playerAt board (fromJust (modifyPos from (0,1))) == None && fromRow == 1
                                                                                 _ -> False
 
@@ -137,15 +151,25 @@ isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case p
 
 
 isCastleMovePossible:: ChessGameState -> Move -> Bool
-isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) = (at board (Pos 5 toRow)) == (Case None Empty)  
-                                                                                && (at board (Pos 6 toRow)) == (Case None Empty) 
-                                                                                && not (hasKingMoved moveHistory turn) && not (hasKingSideRookMoved moveHistory board turn)
-                                                                                && not (isChecked st)
+isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) =(caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
+                                                                                    where   caseOneEmpty = (at board (Pos 5 toRow)) == (Case None Empty)
+                                                                                            caseTwoEmpty = (at board (Pos 6 toRow)) == (Case None Empty)
+                                                                                            kingMove = not (hasKingMoved moveHistory turn)
+                                                                                            rookMove = not (hasKingSideRookMoved moveHistory board turn)
+                                                                                            checked = not (isChecked st)
+                                                                                            toValid = toRow == 0 || toRow == 7 
 
-isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 2 toRow)) = (at board (Pos 3 toRow)) == (Case None Empty) 
-                                                                                && (at board (Pos 2 toRow)) == (Case None Empty) 
-                                                                                && not (hasKingMoved moveHistory turn) && not (hasQueenSideRookMoved moveHistory board turn)
-                                                                                && not (isChecked st)
+isCastleMovePossible st@ChessGameState{board,..} move@(Move from to@(Pos 2 toRow)) = (caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
+                                                                                    where   caseOneEmpty = (at board (Pos 3 toRow)) == (Case None Empty)
+                                                                                            caseTwoEmpty = (at board (Pos 2 toRow)) == (Case None Empty)
+                                                                                            kingMove = not (hasKingMoved moveHistory turn)
+                                                                                            rookMove = not (hasQueenSideRookMoved moveHistory board turn)
+                                                                                            checked = not (isChecked st)
+                                                                                            toValid = toRow == 0 || toRow == 7 
 isCastleMovePossible _ _ = False
 
 
+isEnPassantPossible:: ChessGameState -> Move -> Bool
+isEnPassantPossible st@ChessGameState{board,turn,moveHistory} move@(Move from to) = let previous@(Move prevFrom prevTo) = lastMove moveHistory
+                                                                                    in
+                                                                                    (at board prevTo) == (Case (otherPlayer turn) Pawn) && False

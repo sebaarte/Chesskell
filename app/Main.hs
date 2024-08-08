@@ -1,7 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE NamedFieldPuns #-}
-module Main (ErrorMsg,main) where
+module Main (ErrorMsg,main,initialState,runGame) where
 
 import Data.Char (isAlphaNum)
 import Data.Maybe(fromJust,isJust)
@@ -39,10 +39,15 @@ type ErrorMsg = String
 promptForInput :: IO Command
 promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLine
 
-determineInput:: ChessGameState -> IO Command
-determineInput st@ChessGameState{board,turn}
-    | turn == White = promptForInput
-    | otherwise = getNextMove st
+determineInput:: ChessGameState -> Player -> Bool -> IO Command
+determineInput st@ChessGameState{board,turn} human pvp
+    | pvp || turn == human = promptForInput
+    | otherwise = getNextMove st (otherPlayer human)
+
+
+testBoard:: Board
+testBoard = multipleReplace b [((Pos 0 0),(Case Black King)),((Pos 7 0),(Case White King)),((Pos 1 7),(Case White Rook)),((Pos 7 1),(Case White Rook))]
+                where b = emptyBoard
 
 -- We use a type s to represent a game state, where ...
 -- ... nextState computes the next game state, given the current state and next user input (may fail on invalid input)
@@ -54,14 +59,15 @@ class GameState s where
 -- To "boot" a terminal-based game, we use a type s to represent game state and a type c to represent game configuration, where ...
 -- ... we can compute an initial game state s using a given configuration c (which can fail if the configuration is invalid)
 class GameState s => TerminalGame s c | c -> s where
-    initialState :: c -> Either ErrorMsg s
+    initialState :: c -> IO (Either ErrorMsg s)
 
 -- run a game in the terminal
 --runGame :: (Show s, TerminalGame s c) => c -> IO ()
-runGame = either error loop . initialState
-    where loop st = do print st
-                       unless (isFinalState st) $ do
-                            let tmp = determineInput st
+runGame c =  initialState c >>= either error loop 
+    where loop st = do 
+                       print st
+                       unless (isFinalState st) $ do   
+                            let tmp = determineInput st (if playWhite c then White else Black) (pvp c)
                             cmd <- tmp 
                             let nxt = nextState st cmd
                             either ((>> loop st) . putStrLn) loop nxt
@@ -77,14 +83,17 @@ runGame = either error loop . initialState
 instance GameState ChessGameState where
     nextState state@ChessGameState{board,turn,moveHistory} input
         | isLeft move =  Left "Unable to parse move"
-        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (nextPlayer turn) (appendMove moveHistory board (fromRight move)))
+        | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (otherPlayer turn) (appendMove moveHistory board (fromRight move)))
         | otherwise = Left "Invalid Move provided"
             where move = fromString input
     isFinalState state = isCheckmate state || isDraw state
                
     
 instance TerminalGame ChessGameState ChessGameConfig where
-    initialState ChessGameConfig{..} = if doesFileExist fileName then parseChessFile fileName else Right (ChessGameState initialBoard White )
+    initialState ChessGameConfig{..} = do
+                                        fileExists <- doesFileExist fileName
+                                        if fileExists then return (parseChessFile fileName) else return (Right (ChessGameState initialBoard White (MoveHistory [] [])))
+
 
     
 
@@ -92,6 +101,8 @@ instance TerminalGame ChessGameState ChessGameConfig where
 
 main = do
         args <- getArgs
-        if length args < 1 then error "Program needs at least one argument"
-        else runGame (ChessGameConfig True True (args !! 0))
+        --if length args < 1 then error "Program needs at least one argument"
+        --else
+        
+        runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") "")
         
