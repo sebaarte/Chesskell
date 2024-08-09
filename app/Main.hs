@@ -39,14 +39,15 @@ type ErrorMsg = String
 promptForInput :: IO Command
 promptForInput = putStr "> " >> hFlush stdout >> fmap (filter isAlphaNum) getLine
 
+-- either ask the user for input or queries AI for the next move 
 determineInput:: ChessGameState -> Player -> Bool -> IO Command
 determineInput st@ChessGameState{board,turn} human pvp
     | pvp || turn == human = promptForInput
     | otherwise = getNextMove st (otherPlayer human)
 
-
+-- test board for debugging and testing purposes
 testBoard:: Board
-testBoard = multipleReplace b [((Pos 0 0),(Case Black King)),((Pos 7 0),(Case White King)),((Pos 1 7),(Case White Rook)),((Pos 7 1),(Case White Rook))]
+testBoard = multipleReplace b [((Pos 0 0),(Case Black King)),((Pos 7 0),(Case White King)),((Pos 5 4),(Case White Pawn)),((Pos 6 4),(Case Black Pawn))]
                 where b = emptyBoard
 
 -- We use a type s to represent a game state, where ...
@@ -92,7 +93,7 @@ instance GameState ChessGameState where
 instance TerminalGame ChessGameState ChessGameConfig where
     initialState ChessGameConfig{..} = do
                                         fileExists <- doesFileExist fileName
-                                        if fileExists then return (parseChessFile fileName) else return (Right (ChessGameState initialBoard White (MoveHistory [] [])))
+                                        if fileExists then return (parseChessFile fileName) else return (Right defaultInitialState)
 
 
     
@@ -101,8 +102,6 @@ instance TerminalGame ChessGameState ChessGameConfig where
 
 main = do
         args <- getArgs
-        --if length args < 1 then error "Program needs at least one argument"
-        --else
-        
-        runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") "")
+        if length args < 2 then error "Program needs at least two arguments"
+        else  runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") "")
         

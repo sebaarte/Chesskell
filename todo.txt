@@ -1,16 +1,16 @@
 PARTIE 1
 
-en passant
-make AI choose randomly between equal moves
-
-keep part of move tree (optional)
 
 PARTIE 2
+
 change move history encoding
-change move generation
 GUI
 Undo
 Threading IA (+-)
 SAVE/LOAD (file format)
 
+OPTIONAL
 
+make AI choose randomly between equal moves
+keep part of move tree (optional)
+change move generation

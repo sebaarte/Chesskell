@@ -3,13 +3,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 
-module Case (fromChar,potentialPromotion,Piece(..),Case(..),arePiecesDifferent) where
+module Case (potentialPromotion,Piece(..),Case(..),arePiecesDifferent) where
 import Player
 
 data Piece = Empty | Pawn | Rook | Knight | Bishop | Queen | King deriving Eq
 
 
-
+-- data type representing a case on the board that is either a piece and a color or empty with no color
 data Case = Case {player::Player, piece::Piece} deriving Eq
 
 instance Show Case where
@@ -33,12 +33,11 @@ instance Show Case where
         | player == White = " k"
         | otherwise = " K"
 
-fromChar:: Char -> Case
-fromChar '_' = Case White Empty
 
 -- checks for promotion eligibility and promotes if relevant
 potentialPromotion:: Int -> Case -> Case
 potentialPromotion row c@(Case player piece) = if (row == 7 && player == White && piece == Pawn) || (row == 0 && player == Black && piece == Pawn) then (Case player Queen) else c
+
 
 arePiecesDifferent:: Case -> Case -> Bool
 arePiecesDifferent (Case _ piece1) (Case _ piece2) = piece1 /= piece2 
