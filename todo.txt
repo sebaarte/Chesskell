@@ -1,16 +1,14 @@
-PARTIE 1
-
-
-PARTIE 2
-
-change move history encoding
-GUI
-Undo
-Threading IA (+-)
 SAVE/LOAD (file format)
+use move history entry
+fix bug that causes crash on empty move history
+change move history encoding
+Undo
+GUI
+
+
 
 OPTIONAL
-
+Threading IA
 make AI choose randomly between equal moves
 keep part of move tree (optional)
 change move generation

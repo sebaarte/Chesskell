@@ -82,12 +82,15 @@ executable projet
                         parallel^>=3.2.2.0,
                         time,
                         timeit,
-                        directory
+                        directory,
+                        regex-compat,
+                        split
 
     -- Directories containing source files.
     hs-source-dirs: app,
                     gui,
-                    AI
+                    AI,
+                    saving
 
     -- Base language which the package is written in.
     default-language: GHC2021

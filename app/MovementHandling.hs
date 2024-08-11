@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner,multipleReplace) where
+module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner,multipleReplace,replaceInBoard) where
 
 import Case
 import Pos

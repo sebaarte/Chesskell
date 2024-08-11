@@ -50,7 +50,7 @@ fitnessFunction st@(ChessGameState board _ _) aiPlayer = if isWinner aiPlayer st
 
 -- query the AI to get the next move
 getNextMove:: ChessGameState -> Player -> IO Command
-getNextMove state aiPlayer = putStr "Ai playing...\n" >> putStr ("AI played: " ++ move ++ "\n") >> return move where move = (fromJust (toString (extractBestMove state aiPlayer)))
+getNextMove state aiPlayer = putStr "Ai playing...\n" >> putStr ("AI played: " ++ move ++ "\n") >> return move where move = (fromJust (toStr (extractBestMove state aiPlayer)))
 
 -- choose the best move among all combinations
 -- TODO make the selection random among best candidates

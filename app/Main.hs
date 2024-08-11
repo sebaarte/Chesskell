@@ -30,6 +30,7 @@ import ChessGameData
 import AI
 import MoveHistory
 import GrammarReader
+import Move
 
 
 -- user input for a simple terminal-based game is just a single-line string
@@ -64,7 +65,7 @@ class GameState s => TerminalGame s c | c -> s where
 
 -- run a game in the terminal
 --runGame :: (Show s, TerminalGame s c) => c -> IO ()
-runGame c =  initialState c >>= either error loop 
+runGame c =  initialState c >>= either putStrLn loop
     where loop st = do 
                        print st
                        unless (isFinalState st) $ do   
@@ -86,14 +87,14 @@ instance GameState ChessGameState where
         | isLeft move =  Left "Unable to parse move"
         | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (otherPlayer turn) (appendMove moveHistory board (fromRight move)))
         | otherwise = Left "Invalid Move provided"
-            where move = fromString input
+            where move = (fromStr input)
     isFinalState state = isCheckmate state || isDraw state
                
     
 instance TerminalGame ChessGameState ChessGameConfig where
     initialState ChessGameConfig{..} = do
                                         fileExists <- doesFileExist fileName
-                                        if fileExists then return (parseChessFile fileName) else return (Right defaultInitialState)
+                                        if fileExists then parseChessFile fileName else return (Right defaultInitialState)
 
 
     
@@ -102,6 +103,6 @@ instance TerminalGame ChessGameState ChessGameConfig where
 
 main = do
         args <- getArgs
-        if length args < 2 then error "Program needs at least two arguments"
-        else  runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") "")
+        if length args < 3 then error "Program needs at least two arguments"
+        else  runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") (args !! 2))
         

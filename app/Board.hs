@@ -73,6 +73,7 @@ playerAt board pos = player where (Case player _ ) = at board pos
 
 strRow x = unwords (map show x)
 -- converts a board to a string. Since board is not a data, we can't use show
+-- we do not instantiate board as a token since we do not want it to have a fromString representation
 boardToString:: Board -> String
 boardToString b = unlines (zipWith (++) leftMargin board)
                         where (leftMargin,board) = (map ((++ " |") . show) (reverse [1 .. 8]) , map strRow (reverse b))

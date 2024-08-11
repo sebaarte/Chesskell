@@ -3,10 +3,13 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
 
-module Case (potentialPromotion,Piece(..),Case(..),arePiecesDifferent) where
+module Case (potentialPromotion,Piece(..),Case(..),arePiecesDifferent,fromString) where
 import Player
+import Token
 
-data Piece = Empty | Pawn | Rook | Knight | Bishop | Queen | King deriving Eq
+import Data.Char (toLower)
+
+data Piece = Empty | Pawn | Rook | Knight | Bishop | Queen | King deriving (Eq,Show)
 
 
 -- data type representing a case on the board that is either a piece and a color or empty with no color
@@ -40,4 +43,15 @@ potentialPromotion row c@(Case player piece) = if (row == 7 && player == White &
 
 
 arePiecesDifferent:: Case -> Case -> Bool
-arePiecesDifferent (Case _ piece1) (Case _ piece2) = piece1 /= piece2 
+arePiecesDifferent (Case _ piece1) (Case _ piece2) = piece1 /= piece2
+
+instance Token Piece where
+    fromString s = case map (toLower) s of
+                        "rook" -> Rook
+                        "pawn" -> Pawn
+                        "king" -> King
+                        "queen" -> Queen
+                        "knight" -> Knight
+                        "bishop" -> Bishop
+                        _ -> error "unable to parse Piece from string"
+    toString = show

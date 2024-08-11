@@ -1,6 +1,6 @@
-module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),fromStr,isPosBlack) where
+module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),isPosBlack) where
 import Data.Maybe(fromJust,isJust)
-
+import Token
 
 -- Represents a position on the chessboard
 data Pos = Pos Int Int deriving (Eq,Show)
@@ -43,13 +43,17 @@ colToChar n = case n of
     7 -> Just 'h'
     _ -> Nothing
 
--- build a pos from string if possible
-fromStr:: String -> Maybe Pos
-fromStr s@(a:b:_) = if isJust col && length s == 2 then Just (Pos (fromJust col) (read [b]))
-                    else Nothing
-                    where col = charToCol a
+
 
 -- is a case located at a position black (not the piece on the case, the case itself)
 isPosBlack:: Pos -> Bool
 isPosBlack (Pos col row) = even (col+row)
 
+instance Token Pos where
+    -- build a pos from string if possible
+    fromString:: String -> Pos
+    fromString s@(a:b:_) = if isJust col && length s == 2 then (Pos (fromJust col) ((read [b])-1))
+                            else error "unable to parse Position from string"
+                            where col = charToCol a
+    toString:: Pos -> String
+    toString (Pos col row) = [fromJust (colToChar col)] ++ show (row+1)
