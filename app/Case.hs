@@ -53,5 +53,6 @@ instance Token Piece where
                         "queen" -> Queen
                         "knight" -> Knight
                         "bishop" -> Bishop
-                        _ -> error "unable to parse Piece from string"
-    toString = show
+                        _ -> Empty
+    toString piece | piece ==  Empty = ""
+                   | otherwise = show piece

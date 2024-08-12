@@ -1,5 +1,5 @@
 SAVE/LOAD (file format)
-use move history entry
+use move history entry (get rid of old one)
 fix bug that causes crash on empty move history
 change move history encoding
 Undo

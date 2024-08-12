@@ -197,10 +197,6 @@ isEnPassant st@ChessGameState{board,turn,moveHistory} move@(Move from to@(Pos _ 
                                                                                                 pawnsDiff = substract prevTo  from
                                                                                                 diagonalDiff = if turn == Black then (0,-1) else (0,1)
                                                                                     in
-                                                                                    trace
-                                                                                    (show ((at board prevTo) == (Case (otherPlayer turn) Pawn)) ++ show (prevDiff == (0,2) || prevDiff == (0,-2)) -- check if pawn moved 2 cases
-                                                                                    ++ show (pawnsDiff == (1,0) || pawnsDiff == (-1,0)) -- taking pawn is located next to taken pawn
-                                                                                    ++ show (substract prevTo to == diagonalDiff))
                                                                                     (at board prevTo) == (Case (otherPlayer turn) Pawn) && (prevDiff == (0,2) || prevDiff == (0,-2)) -- check if pawn moved 2 cases
                                                                                     && (pawnsDiff == (1,0) || pawnsDiff == (-1,0)) -- taking pawn is located next to taken pawn
                                                                                     && substract prevTo to == diagonalDiff -- the taking pawn is moving to the correct case

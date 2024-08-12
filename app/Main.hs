@@ -6,7 +6,7 @@ module Main (ErrorMsg,main,initialState,runGame) where
 import Data.Char (isAlphaNum)
 import Data.Maybe(fromJust,isJust)
 import Debug.Trace(trace)
-import Control.Monad (unless)
+import Control.Monad (unless,when)
 import Text.Read (readEither)
 import System.Random (mkStdGen, randomR)
 import GHC.IO.Handle (hFlush)
@@ -71,6 +71,7 @@ runGame c =  initialState c >>= either putStrLn loop
                        unless (isFinalState st) $ do   
                             let tmp = determineInput st (if playWhite c then White else Black) (pvp c)
                             cmd <- tmp 
+                            when (cmd == "stop")  (saveFile st (fileName c) >> exitSuccess)  
                             let nxt = nextState st cmd
                             either ((>> loop st) . putStrLn) loop nxt
 
@@ -98,8 +99,6 @@ instance TerminalGame ChessGameState ChessGameConfig where
 
 
     
-
-
 
 main = do
         args <- getArgs

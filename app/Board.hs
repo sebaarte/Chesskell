@@ -1,4 +1,4 @@
-module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame,boardToString,allPieces,emptyBoard) where
+module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame,boardToString,allPieces,emptyBoard,pieceAt) where
 
 import Case
 import Player
@@ -69,7 +69,8 @@ at board m@(Pos col row) = let cases = rowAt board m in cases !! col
 playerAt:: Board -> Pos -> Player
 playerAt board pos = player where (Case player _ ) = at board pos
 
-
+pieceAt:: Board -> Pos -> Piece
+pieceAt board pos = piece where (Case _ piece) = at board pos
 
 strRow x = unwords (map show x)
 -- converts a board to a string. Since board is not a data, we can't use show

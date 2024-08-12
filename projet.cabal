@@ -70,7 +70,8 @@ executable projet
                     AI,
                     MoveTree,
                     MoveHistory,
-                    GrammarReader
+                    GrammarReader,
+                    Token
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -84,13 +85,14 @@ executable projet
                         timeit,
                         directory,
                         regex-compat,
-                        split
+                        split,
+                        gloss
 
     -- Directories containing source files.
     hs-source-dirs: app,
                     gui,
                     AI,
-                    saving
+                    persistency
 
     -- Base language which the package is written in.
     default-language: GHC2021
