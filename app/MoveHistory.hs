@@ -69,14 +69,14 @@ instance Token MoveType where
 
 -- regex to match a move in a history
 moveRegex:: Regex
-moveRegex = mkRegexWithOpts "((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))([a-h][1-8][a-h][1-8])((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?" False True
+moveRegex = mkRegexWithOpts "((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))([a-h][1-8][a-h][1-8])((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?" False False
 
 instance Token MoveHistoryEntry where
     fromString s = do
                     let ptokens = matchRegex moveRegex s
-                    let tokens = fromJust ptokens
+                    let tokens = (filter (/= "")(fromJust ptokens))
                     case length (tokens) of
                         3 -> (Entry (fromRight (fromStr (tokens !! 2))) ((fromString (tokens !! 0)),Empty) Normal)
                         5 -> (Entry (fromRight (fromStr (tokens !! 2))) ((fromString (tokens !! 0)), fromString (tokens !! 3)) (fromString (tokens !! 3)))
-                        _ -> trace (concat tokens) (error "unable to parse Move object")
+                        _ -> trace (show tokens) (error "unable to parse Move object")
     toString (Entry move (piece1,piece2) moveType) = (toString piece1) ++ (fromJust (toStr move)) ++ if moveType == Normal then toString piece2 else toString moveType

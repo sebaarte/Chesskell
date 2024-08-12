@@ -71,7 +71,8 @@ executable projet
                     MoveTree,
                     MoveHistory,
                     GrammarReader,
-                    Token
+                    Token,
+                    SaveFile
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

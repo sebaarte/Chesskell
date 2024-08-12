@@ -31,6 +31,7 @@ import AI
 import MoveHistory
 import GrammarReader
 import Move
+import SaveFile
 
 
 -- user input for a simple terminal-based game is just a single-line string

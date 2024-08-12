@@ -1,12 +1,12 @@
 {-# LANGUAGE PatternGuards #-}
 
 
-module GrammarReader (parseChessFile,saveFile) where
+module GrammarReader (parseChessFile) where
 import System.IO
 import Text.Regex
 import Data.Maybe(fromJust,isJust)
 import Data.List.Split
-import Data.List
+
 import Debug.Trace
 import Data.Either.Utils (fromRight)
 
@@ -25,17 +25,15 @@ import Move
 
 -- regexes to parse the grammar
 playerRegex:: Regex
-playerRegex = mkRegexWithOpts "player\\((W|B)\\)" False True
+playerRegex = mkRegexWithOpts "player\\((W|B)\\)" False False
 
 -- we extended the grammar to include EP and Castle tokens (i.e. en passant and castle moves)
 historyRegex:: Regex
-historyRegex = mkRegexWithOpts "history\\(((((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?)(,((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))?)*)\\)" False True
-
-
+historyRegex = mkRegexWithOpts "history\\(((((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?)(,((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))?)*)\\)" False False
 
 
 piecesRegex:: Regex
-piecesRegex = mkRegexWithOpts "(piece\\((([a-z]+),(W|B),([a-h][1-8]))\\))+" False True
+piecesRegex = mkRegexWithOpts "(piece\\((([a-z]+),(W|B),([a-h][1-8]))\\))+" False False
 
 
 type ErrorMsg = String
@@ -85,19 +83,6 @@ parseMoveToken s = fromString s
 parseMoveHistory:: String -> MoveHistory
 parseMoveHistory s = let tokens = splitOn "," s in EntryHistory (map (parseMoveToken) tokens)
 
-playerString:: Player -> String
-playerString p = "player(" ++ toString p ++ ")\n"
-
-moveHistoryString:: MoveHistory -> String
-moveHistoryString mh@(EntryHistory entries) = "history(" ++  intercalate "," (map toString entries) ++ ")\n"
-
-piecesString:: Board -> String
-piecesString board =    let 
-                            piecesPos = (allPieces board)
-                            cases = map (at board) piecesPos
-                        in
-                        concat (zipWith (\pos (Case player piece) -> "piece(" ++ toString piece ++ "," ++ toString player ++ "," ++ toString pos ++ "\n") piecesPos cases)
 
 
-saveFile:: ChessGameState -> FilePath -> IO ()
-saveFile st@ChessGameState{board,turn,moveHistory} f = writeFile f (playerString turn ++ moveHistoryString moveHistory ++ piecesString board)
+
