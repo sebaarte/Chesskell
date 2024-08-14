@@ -20,7 +20,7 @@ name:               Chesskell
 -- PVP summary:     +-+------- breaking API changes
 --                  | | +----- non-breaking API additions
 --                  | | | +--- code changes with no API change
-version:            0.1.0.1
+version:            2.1.0.1
 
 -- A short (one-line) description of the package.
 -- synopsis:
@@ -72,7 +72,11 @@ executable projet
                     MoveHistory,
                     GrammarReader,
                     Token,
-                    SaveFile
+                    SaveFile,
+                    Undo
+    
+    extra-lib-dirs: libs
+
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -93,7 +97,8 @@ executable projet
     hs-source-dirs: app,
                     gui,
                     AI,
-                    persistency
+                    persistency,
+                    undo
 
     -- Base language which the package is written in.
     default-language: GHC2021

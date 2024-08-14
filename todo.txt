@@ -1,14 +1,8 @@
-SAVE/LOAD (file format)
-use move history entry (get rid of old one)
-fix bug that causes crash on empty move history
-change move history encoding
-Undo
 GUI
-
+Threading IA
 
 
 OPTIONAL
-Threading IA
 make AI choose randomly between equal moves
 keep part of move tree (optional)
 change move generation

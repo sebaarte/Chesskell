@@ -29,7 +29,7 @@ playerRegex = mkRegexWithOpts "player\\((W|B)\\)" False False
 
 -- we extended the grammar to include EP and Castle tokens (i.e. en passant and castle moves)
 historyRegex:: Regex
-historyRegex = mkRegexWithOpts "history\\(((((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?)(,((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))?)*)\\)" False False
+historyRegex = mkRegexWithOpts "history\\(((((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop)|(EP)|(Castle))?)(,((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))[a-h][1-8][a-h][1-8]((rook)|(pawn)|(king)|(queen)|(knight)|(bishop))?)*)?\\)" False False
 
 
 piecesRegex:: Regex
@@ -74,14 +74,15 @@ fillBoard ss = multipleReplace emptyBoard (map parsePieceToken ss)
 
 
 
--- un-Haskell way to parse tokens but way easier that breaking down the function into smaller functions
+
 parseMoveToken:: String -> MoveHistoryEntry
 parseMoveToken s = fromString s
                     
                     
 
 parseMoveHistory:: String -> MoveHistory
-parseMoveHistory s = let tokens = splitOn "," s in EntryHistory (map (parseMoveToken) tokens)
+parseMoveHistory "" = EntryHistory []
+parseMoveHistory s = let tokens = splitOn "," s in (EntryHistory (map (parseMoveToken) tokens))
 
 
 

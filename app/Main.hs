@@ -20,6 +20,7 @@ import System.Exit
 import System.Environment   
 import Data.List
 import System.Directory
+import Graphics.Gloss
 
 import Pos
 import MovementHandling
@@ -32,6 +33,7 @@ import MoveHistory
 import GrammarReader
 import Move
 import SaveFile
+import Undo
 
 
 -- user input for a simple terminal-based game is just a single-line string
@@ -68,13 +70,14 @@ class GameState s => TerminalGame s c | c -> s where
 --runGame :: (Show s, TerminalGame s c) => c -> IO ()
 runGame c =  initialState c >>= either putStrLn loop
     where loop st = do 
-                       print st
-                       unless (isFinalState st) $ do   
-                            let tmp = determineInput st (if playWhite c then White else Black) (pvp c)
-                            cmd <- tmp 
-                            when (cmd == "stop")  (saveFile st (fileName c) >> exitSuccess)  
-                            let nxt = nextState st cmd
-                            either ((>> loop st) . putStrLn) loop nxt
+                        print st
+                        let piecesPos = (allPieces (board st))
+                        unless (isFinalState st) $ do   
+                                let tmp = determineInput st (if playWhite c then White else Black) (pvp c)
+                                cmd <- tmp 
+                                when (cmd == "stop")  (saveFile st (fileName c) >> exitSuccess)  -- this is not put elsewhere as it stops the "normal flow" of the program
+                                let nxt = nextState st cmd
+                                either ((>> loop st) . putStrLn) loop nxt
 
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -86,6 +89,7 @@ runGame c =  initialState c >>= either putStrLn loop
 
 instance GameState ChessGameState where
     nextState state@ChessGameState{board,turn,moveHistory} input
+        | input == "undo" = if canUndo moveHistory then Right (undoLastMove state) else Left "Impossible to undo: no previous move"
         | isLeft move =  Left "Unable to parse move"
         | isValidMove state  (fromRight move) = Right (ChessGameState (applyMove board (fromRight move)) (otherPlayer turn) (appendMove moveHistory board (fromRight move)))
         | otherwise = Left "Invalid Move provided"
@@ -101,8 +105,12 @@ instance TerminalGame ChessGameState ChessGameConfig where
 
     
 
-main = do
-        args <- getArgs
-        if length args < 3 then error "Program needs at least two arguments"
-        else  runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") (args !! 2))
-        
+-- main = do
+--         args <- getArgs
+--         if length args < 3 then error "Program needs at least two arguments"
+--         else  runGame (ChessGameConfig ((args !! 0) == "pvp") ((args !! 1) == "w") (args !! 2))
+
+
+
+myWindow = InWindow "My Window" (200, 200) (10, 10)
+main = display myWindow white (Circle 80)

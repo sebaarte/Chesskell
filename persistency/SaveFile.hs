@@ -1,6 +1,6 @@
 module SaveFile(saveFile) where
 import Data.List
-
+import Debug.Trace
 
 import ChessGameData
 import System.IO
@@ -15,6 +15,7 @@ playerString:: Player -> String
 playerString p = "player(" ++ toString p ++ ")\n"
 
 moveHistoryString:: MoveHistory -> String
+moveHistoryString mh@(EntryHistory []) = "history()\n"
 moveHistoryString mh@(EntryHistory entries) = "history(" ++  intercalate "," (map toString entries) ++ ")\n"
 
 piecesString:: Board -> String

@@ -169,6 +169,7 @@ isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case p
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player Rook) = elem to (linesFrom board from player cardinals 4)
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player Queen) = elem to ((linesFrom board from player cardinals 4) ++ (linesFrom board from player diagonals 4))
 isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case player King) = elem (Just to) (map (modifyPos from) (cardinals ++ diagonals)) || isCastleMove state move
+isPossibleDestination st move c = error "This shouldnt be happening"
 
 
 -- checks if a move is a castle move and its validity
@@ -176,7 +177,7 @@ isCastleMove:: ChessGameState -> Move -> Bool
 isCastleMove st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) =(caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
                                                                                     where   caseOneEmpty = (at board (Pos 5 toRow)) == (Case None Empty)
                                                                                             caseTwoEmpty = (at board (Pos 6 toRow)) == (Case None Empty)
-                                                                                            kingMove = not (hasKingMoved moveHistory turn)
+                                                                                            kingMove = not (hasKingMoved moveHistory board turn)
                                                                                             rookMove = not (hasKingSideRookMoved moveHistory board turn)
                                                                                             checked = not (isChecked st)
                                                                                             toValid = toRow == 0 || toRow == 7 
@@ -184,14 +185,15 @@ isCastleMove st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) =(cas
 isCastleMove st@ChessGameState{board,..} move@(Move from to@(Pos 2 toRow)) = (caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
                                                                                     where   caseOneEmpty = (at board (Pos 3 toRow)) == (Case None Empty)
                                                                                             caseTwoEmpty = (at board (Pos 2 toRow)) == (Case None Empty)
-                                                                                            kingMove = not (hasKingMoved moveHistory turn)
+                                                                                            kingMove = not (hasKingMoved moveHistory board turn)
                                                                                             rookMove = not (hasQueenSideRookMoved moveHistory board turn)
                                                                                             checked = not (isChecked st)
-                                                                                            toValid = toRow == 0 || toRow == 7 
+                                                                                            toValid = toRow == 0 || toRow == 7
 isCastleMove _ _ = False
 
 -- checks if a move is a en passant move and its validity
 isEnPassant:: ChessGameState -> Move -> Bool
+isEnPassant st@ChessGameState{board,turn,moveHistory=(EntryHistory [])} _ = False
 isEnPassant st@ChessGameState{board,turn,moveHistory} move@(Move from to@(Pos _ toRow)) = let   (Move prevFrom prevTo) = lastMove moveHistory
                                                                                                 prevDiff = substract prevFrom prevTo
                                                                                                 pawnsDiff = substract prevTo  from

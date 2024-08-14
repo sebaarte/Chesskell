@@ -21,7 +21,7 @@ data ChessGameState = ChessGameState{board::Board,turn::Player,moveHistory::Move
 initialBoard = [playerRow White,pawnRow White] ++ replicate 4 emptyRow ++ [pawnRow Black,playerRow Black]
 
 -- initial state for a game of chess
-defaultInitialState = (ChessGameState initialBoard White (MoveHistory [] []))
+defaultInitialState = (ChessGameState initialBoard White (EntryHistory [] ))
 
 
 

@@ -3,6 +3,7 @@
 build-depends: base
             , gloss
 -}
+import Graphics.Gloss
 
 
 
@@ -10,3 +11,6 @@ build-depends: base
 
 
 
+
+myWindow = InWindow "My Window" (200, 200) (10, 10)
+main = display myWindow white (Circle 80)
