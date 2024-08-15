@@ -1,4 +1,4 @@
-module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),isPosBlack) where
+module Pos (modifyPos,Pos(..),charToCol,colToChar,substract,(<?),isPosBlack,isInBounds) where
 import Data.Maybe(fromJust,isJust)
 import Token
 
@@ -12,6 +12,9 @@ data Pos = Pos Int Int deriving (Eq,Show)
 -- adds a pair to a position and checks the validity of the result then returns it
 modifyPos::Pos -> (Int,Int) -> Maybe Pos
 modifyPos (Pos col row) (x,y) = if (x+col) <? (0,7) && (y+row) <? (0,7) then Just (Pos (x+col) (y+row)) else Nothing
+
+isInBounds:: Pos -> Bool
+isInBounds (Pos col row) = col <? (0,7) && row <? (0,7)
 
 -- substract two positions and returns a pair
 substract::Pos -> Pos -> (Int,Int)

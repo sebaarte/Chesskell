@@ -18,6 +18,6 @@ instance Token Player where
                 "B" -> Black
                 "b" -> Black
                 _ -> error "unable to parse Player"
-    toString player | player == White = "W"
-                    | player == Black = "B"
+    toString player | player == White = "w"
+                    | player == Black = "b"
                     | otherwise = "_"

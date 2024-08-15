@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 
-module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner,multipleReplace,replaceInBoard) where
+module MovementHandling (isPossibleDestination,isValidMove,validCases,applyMove,Move(..),fromString,isCheckmate,isDraw,possibleMoves,isWinner,multipleReplace,replaceInBoard,possibleDestinationsFrom) where
 
 import Case
 import Pos
@@ -10,6 +10,7 @@ import Player
 import ChessGameData
 import Move
 import MoveHistory
+import Token
 
 import Debug.Trace (trace)
 import Data.Maybe(fromJust,isJust)
@@ -25,27 +26,30 @@ replaceInBoard board pos@(Pos col row) c@(Case player piece) = replace board row
 
 -- sequentially replace cases in the board with the provided position and case tuples
 multipleReplace:: Board -> [(Pos,Case)] -> Board
-multipleReplace b [] = b
-multipleReplace b (x:xs) = multipleReplace (replaceInBoard b (fst x) (snd x)) xs
+multipleReplace b [] =  trace (show b) b
+multipleReplace b (x:xs) = trace ("caca") multipleReplace (replaceInBoard b (fst x) (snd x)) xs
 
 -- move a piece from position "from" to position "to" or apply a special move (castle, en passant)
 applyMove:: Board -> Move -> Board
 -- castling move
-applyMove b (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  case (toCol,(at b from)) of
-                                                                                (6,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King)),((Pos 5 0),(Case White Rook)),((Pos 7 0),(Case None Empty) )]
-                                                                                (2,(Case White King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case White King) ),((Pos 3 0),(Case White Rook) ),((Pos 0 0),(Case None Empty) )]
-                                                                                (6,(Case Black King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 5 7),(Case Black Rook) ),((Pos 7 7),(Case None Empty) )]
-                                                                                (2,(Case Black King)) -> multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 3 7),(Case Black Rook) ),((Pos 0 7),(Case None Empty) )]
-                                                                                _ -> replaceInBoard tempBoard from (Case None Empty) 
-                                                                                        where tempBoard = replaceInBoard b to (at b from)
+applyMove b (Move from@(Pos 4 fromRow) to@(Pos toCol toRow)) =  
+                                                                (case (toCol,(at b from)) of
+                                                                    (6,(Case White King)) ->  multipleReplace b [(from,(Case None Empty)),(to,(Case White King)),((Pos 5 0),(Case White Rook)),((Pos 7 0),(Case None Empty) )]
+                                                                    (2,(Case White King)) ->  multipleReplace b [(from,(Case None Empty)),(to,(Case White King) ),((Pos 3 0),(Case White Rook) ),((Pos 0 0),(Case None Empty) )]
+                                                                    (6,(Case Black King)) ->  multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 5 7),(Case Black Rook) ),((Pos 7 7),(Case None Empty) )]
+                                                                    (2,(Case Black King)) ->  multipleReplace b [(from,(Case None Empty)),(to,(Case Black King) ),((Pos 3 7),(Case Black Rook) ),((Pos 0 7),(Case None Empty) )]
+                                                                    _ -> replaceInBoard tempBoard from (Case None Empty))
+                                                                            where tempBoard = replaceInBoard b to (at b from)
 -- en passant
-applyMove b (Move from@(Pos fromCol 3) to@(Pos toCol 2)) =  if (at b from) == (Case Black Pawn) && (at b to) == (Case None Empty) && (fromCol - toCol) /= 0
+applyMove b (Move from@(Pos fromCol 3) to@(Pos toCol 2)) =  
+                                                            (if (at b from) == (Case Black Pawn) && (at b to) == (Case None Empty) && (fromCol - toCol) /= 0
                                                             then multipleReplace b [(from,(Case None Empty)),(to,(Case Black Pawn)),((Pos toCol 3),(Case None Empty))]
-                                                            else replaceInBoard tempBoard from (Case None Empty) 
+                                                            else replaceInBoard tempBoard from (Case None Empty))
                                                                 where tempBoard = replaceInBoard b to (at b from)
-applyMove b (Move from@(Pos fromCol 4) to@(Pos toCol 5)) =  if (at b from) == (Case White Pawn) && (at b to) == (Case None Empty) && (fromCol - toCol) /= 0 
+applyMove b (Move from@(Pos fromCol 4) to@(Pos toCol 5)) =  
+                                                            (if (at b from) == (Case White Pawn) && (at b to) == (Case None Empty) && (fromCol - toCol) /= 0 
                                                             then multipleReplace b [(from,(Case None Empty)),(to,(Case White Pawn)),((Pos toCol 4),(Case None Empty))]
-                                                            else replaceInBoard tempBoard from (Case None Empty) 
+                                                            else replaceInBoard tempBoard from (Case None Empty))
                                                                 where tempBoard = replaceInBoard b to (at b from)
 
 -- normal move
@@ -63,18 +67,19 @@ moveInBounds::Move -> Bool
 moveInBounds move@(Move (Pos fromCol fromRow) (Pos toCol toRow)) = all (==True) (map (\x -> x <? (0,7)) [fromCol,fromRow,toCol,toRow])
 
 isChecked:: ChessGameState -> Bool
-isChecked state@ChessGameState{board,turn,..} = (movesFrom state (locateKing board turn) turn) /= []
+isChecked state@ChessGameState{board,turn,..} = (movesTo state (locateKing board turn) turn) /= []
 
 
 
 -- checks for validity of a move in all possible cases
 isValidMove:: ChessGameState -> Move -> Bool
-isValidMove state@ChessGameState{board,turn,moveHistory} move@(Move from to) = let nextBoard = applyMove board move
-                                                                                   res = moveInBounds move
-                                                                                        && (validCases state move)
-                                                                                        && (isPossibleDestination state move (at board from))
-                                                                                        && not (isChecked (ChessGameState nextBoard turn (appendMove moveHistory board move))) 
-                                                                                in res
+isValidMove state@ChessGameState{board,turn,moveHistory} move@(Move from to) = let  nextBoard = applyMove board move
+                                                                                    inbounds = moveInBounds move
+                                                                                    valid = (validCases state move)
+                                                                                    possibleDest = (isPossibleDestination state move (at board from))
+                                                                                    notchecked = not (isChecked (ChessGameState nextBoard turn (appendMove moveHistory board move))) 
+                                                                                    res = inbounds && valid && possibleDest && notchecked
+                                                                                in  trace ("test") res
                                                                     
 
 
@@ -97,8 +102,8 @@ linesFrom b p@(Pos col row) player directions idx = do
                                                             else []
 
 -- returns the possible positions from which a move is possible to the given position -> used to assess a check position
-movesFrom:: ChessGameState -> Pos -> Player -> [Pos]
-movesFrom state@ChessGameState{board,turn,..} p@(Pos col row) player = filter (\x -> isPossibleDestination state (Move x p) (at board x)) allPositions
+movesTo:: ChessGameState -> Pos -> Player -> [Pos]
+movesTo state@ChessGameState{board,turn,..} p@(Pos col row) player = filter (\x -> isPossibleDestination state (Move x p) (at board x)) allPositions
 
 -- return all possible moves for a player in a game state
 possibleMoves::ChessGameState -> [Move]
@@ -172,9 +177,25 @@ isPossibleDestination state@ChessGameState{board,..} move@(Move from to) (Case p
 isPossibleDestination st move c = error "This shouldnt be happening"
 
 
+-- returns the possible destinations from a position
+possibleDestinationsFrom:: ChessGameState -> Pos -> Case -> [Pos]
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case player King) = (filter (\p -> isValidMove st (Move pos p)) (map fromJust (filter (isJust) (map (modifyPos pos) (cardinals ++ diagonals))))) ++ if isCastleMove st (Move pos (Pos (col+2) row)) then [(Pos (col+2) row)] else [] ++ if isCastleMove st (Move pos (Pos (col-2) row)) then [(Pos (col-2) row)] else []
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case player Queen) = (linesFrom board pos turn cardinals 4) ++ (linesFrom board pos turn diagonals 4)
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case player Rook) = linesFrom board pos player cardinals 4
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case White Pawn) = filter (\p -> isValidMove st (Move pos p)) [(Pos (col) (row+1)),(Pos (col+1) (row+1)),(Pos (col-1) (row+1)),(Pos (col) (row+2))]
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case Black Pawn) = filter (\p -> isValidMove st (Move pos p)) [(Pos (col) (row-1)),(Pos (col+1) (row-1)),(Pos (col-1) (row-1)),(Pos (col) (row-2))]
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case player Bishop) = linesFrom board pos player diagonals 4
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) c@(Case player Knight) = filter (\p -> isValidMove st (Move pos p)) [(Pos (col+1) (row+2)),(Pos (col+2) (row+1)),(Pos (col+1) (row-1)),(Pos (col+1) (row-2)),(Pos (col-1) (row-2)),(Pos (col-2) (row-1)),(Pos (col-2) (row+1)),(Pos (col-1) (row+2))]
+possibleDestinationsFrom st@ChessGameState{..} pos@(Pos col row) _ = []
+
+
+
+
 -- checks if a move is a castle move and its validity
 isCastleMove:: ChessGameState -> Move -> Bool
-isCastleMove st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) =(caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
+isCastleMove st@ChessGameState{board,..} move@(Move from to@(Pos 6 toRow)) = trace ("[MovementHandling.hs]: evaluating castle move from= "++ toString from ++ " to= " ++ toString to ++
+                                                                            "    Results: " ++ show caseOneEmpty ++ " "++ show caseTwoEmpty ++ " "++ show kingMove ++ " "++ show rookMove ++ " " ++ show toValid ++ " " ++ show checked)
+                                                                            (caseOneEmpty && caseTwoEmpty &&  kingMove && rookMove && checked && toValid)
                                                                                     where   caseOneEmpty = (at board (Pos 5 toRow)) == (Case None Empty)
                                                                                             caseTwoEmpty = (at board (Pos 6 toRow)) == (Case None Empty)
                                                                                             kingMove = not (hasKingMoved moveHistory board turn)
@@ -202,3 +223,5 @@ isEnPassant st@ChessGameState{board,turn,moveHistory} move@(Move from to@(Pos _ 
                                                                                     (at board prevTo) == (Case (otherPlayer turn) Pawn) && (prevDiff == (0,2) || prevDiff == (0,-2)) -- check if pawn moved 2 cases
                                                                                     && (pawnsDiff == (1,0) || pawnsDiff == (-1,0)) -- taking pawn is located next to taken pawn
                                                                                     && substract prevTo to == diagonalDiff -- the taking pawn is moving to the correct case
+
+

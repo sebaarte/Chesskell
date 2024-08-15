@@ -4,7 +4,10 @@
 
 
 
-module ChessGameData (ChessGameConfig(..),ChessGameState(..),initialBoard,Command,defaultInitialState) where
+module ChessGameData (ChessGameConfig(..),ChessGameState(..),Command) where
+
+
+
 import Board
 import Move
 import Case
@@ -13,15 +16,11 @@ import Board
 import MoveHistory
 
 type Command = String
+type ErrorMsg = String
 
 data ChessGameConfig = ChessGameConfig {pvp::Bool, playWhite::Bool,fileName::FilePath}
 data ChessGameState = ChessGameState{board::Board,turn::Player,moveHistory::MoveHistory}
 
--- initial board for a game of chess
-initialBoard = [playerRow White,pawnRow White] ++ replicate 4 emptyRow ++ [pawnRow Black,playerRow Black]
-
--- initial state for a game of chess
-defaultInitialState = (ChessGameState initialBoard White (EntryHistory [] ))
 
 
 

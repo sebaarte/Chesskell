@@ -16,7 +16,6 @@ data Piece = Empty | Pawn | Rook | Knight | Bishop | Queen | King deriving (Eq,S
 data Case = Case {player::Player, piece::Piece} deriving Eq
 
 instance Show Case where
-    show Case {piece = Empty, ..} = " ·"
     show Case {piece = Pawn,player}
         | player == White = " p"
         | otherwise = " P"
@@ -35,6 +34,7 @@ instance Show Case where
     show Case {piece = King,player}
         | player == White = " k"
         | otherwise = " K"
+    show _ = " ·"
 
 
 -- checks for promotion eligibility and promotes if relevant

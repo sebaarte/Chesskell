@@ -6,7 +6,7 @@ import Data.Maybe(fromJust,isJust)
 import Debug.Trace(trace)
 
 -- data type that encodes a move from a postion to another position
-data Move = Move{from::Pos, to::Pos}  deriving (Eq,Show)
+data Move = Move{from::Pos, to::Pos} | NoMove deriving (Eq,Show)
 
 
 

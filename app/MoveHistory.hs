@@ -25,18 +25,19 @@ data MoveHistoryEntry = Entry Move (Piece,Piece) MoveType deriving (Eq)
 data MoveType = EnPassant | Castle | Normal deriving Eq
 
 determineSpecialMove:: Board -> Move -> MoveType
-determineSpecialMove board move@(Move from to) = let diff@(colDiff,rowDiff) = (substract from to)
+determineSpecialMove board move@(Move from to) = let (colDiff,rowDiff) = (substract from to)
                                             in
-                                            case (pieceAt board from) of
+                                            trace ("verge") 
+                                            (case (pieceAt board from) of
                                             King -> if (abs colDiff) == 2 then Castle else Normal
                                             Pawn -> if (abs colDiff) == (abs rowDiff) && (pieceAt board to) == Empty then EnPassant else Normal
-                                            _ -> Normal
+                                            _ -> Normal)
                                             
 
 -- adds a move and the relevant information to the move history
 appendMove:: MoveHistory -> Board -> Move -> MoveHistory
-appendMove (MoveHistory moves cases) board move@(Move from to) =  MoveHistory (moves ++ [move]) (cases ++ [((at board from),(at board to))])
-appendMove (EntryHistory entries) board move@(Move from to) = EntryHistory (entries ++ [Entry move ((pieceAt board from),(pieceAt board to)) (determineSpecialMove board move)]) 
+appendMove (MoveHistory moves cases) board move@(Move from to) =   MoveHistory (moves ++ [move]) (cases ++ [((at board from),(at board to))])
+appendMove (EntryHistory entries) board move@(Move from to) =  EntryHistory ((entries ++ [Entry move ((pieceAt board from),(pieceAt board to)) (determineSpecialMove board move)])) 
 
 -- get the last move in the move history
 lastMove:: MoveHistory -> Move
@@ -48,7 +49,7 @@ lastMove (EntryHistory entries) = let (Entry move _ _) = last entries in move
 -- checks move history to see if a king already moved for castling purposes
 hasKingMoved:: MoveHistory -> Board -> Player -> Bool
 hasKingMoved (MoveHistory moves cases) board player = (elem (Case player King) fromMoves) where fromMoves = map fst cases
-hasKingMoved (EntryHistory entries) board player =  all (==False) (map (\x -> isAKingMove x board player) entries)
+hasKingMoved (EntryHistory entries) board player =  any (==True) (map (\x -> isAKingMove x board player) entries)
 
 isAKingMove:: MoveHistoryEntry -> Board -> Player -> Bool
 isAKingMove (Entry move@(Move from to) (piece1,piece2) moveType) board player = piece1 == King && (playerAt board from) == player
@@ -58,18 +59,18 @@ hasKingSideRookMoved:: MoveHistory -> Board -> Player -> Bool
 hasKingSideRookMoved (MoveHistory moves cases) board White = (elem (Pos 7 0) fromMoves) || (at board (Pos 7 0)) /= (Case White Rook) where fromMoves = map from moves
 hasKingSideRookMoved (MoveHistory moves cases) board Black = (elem (Pos 7 7) fromMoves) || (at board (Pos 7 7)) /= (Case Black Rook) where fromMoves = map from moves
 hasKingSideRookMoved (EntryHistory entries) board White = any (==True) (map (\x -> isAKingSideRookMove x board White) entries) || (at board (Pos 7 0)) /= (Case White Rook)
-hasKingSideRookMoved (EntryHistory entries) board White = any (==True) (map (\x -> isAKingSideRookMove x board Black) entries ) || (at board (Pos 7 7)) /= (Case Black Rook)
+hasKingSideRookMoved (EntryHistory entries) board Black = any (==True) (map (\x -> isAKingSideRookMove x board Black) entries ) || (at board (Pos 7 7)) /= (Case Black Rook)
 
 isAKingSideRookMove:: MoveHistoryEntry -> Board -> Player -> Bool
-isAKingSideRookMove (Entry move@(Move from to) (piece1,piece2) moveType) board White = from /= (Pos 7 0)
-isAKingSideRookMove (Entry move@(Move from to) (piece1,piece2) moveType) board Black = from /= (Pos 7 7)
+isAKingSideRookMove (Entry move@(Move from to) (piece1,piece2) moveType) board White = from == (Pos 7 0)
+isAKingSideRookMove (Entry move@(Move from to) (piece1,piece2) moveType) board Black = from == (Pos 7 7)
 
 -- checks move history to see if a queen side rook already moved for castling purposes
 hasQueenSideRookMoved:: MoveHistory -> Board -> Player -> Bool
 hasQueenSideRookMoved (MoveHistory moves cases) board White = (elem (Pos 0 0) fromMoves) || (at board (Pos 0 0)) /= (Case White Rook) where fromMoves = map from moves
 hasQueenSideRookMoved (MoveHistory moves cases) board Black = (elem (Pos 0 7) fromMoves) || (at board (Pos 0 7)) /= (Case Black Rook) where fromMoves = map from moves
 hasQueenSideRookMoved (EntryHistory entries) board White = (any (==True) (map (\x -> isAQueenSideRookMove x board White) entries)) || (at board (Pos 0 0)) /= (Case White Rook)
-hasQueenSideRookMoved (EntryHistory entries) board White = (any (==True) (map (\x -> isAQueenSideRookMove x board Black) entries)) || (at board (Pos 0 7)) /= (Case Black Rook)
+hasQueenSideRookMoved (EntryHistory entries) board Black = (any (==True) (map (\x -> isAQueenSideRookMove x board Black) entries)) || (at board (Pos 0 7)) /= (Case Black Rook)
 
 
 isAQueenSideRookMove:: MoveHistoryEntry -> Board -> Player -> Bool

@@ -1,4 +1,4 @@
-module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame,boardToString,allPieces,emptyBoard,pieceAt) where
+module Board (charToCol,colToChar,playerAt,Board(..),pawnRow,emptyRow,playerRow,at,locateKing,allPositions,locateAllPlayerPieces,piecesInGame,boardToString,allPieces,emptyBoard,pieceAt,allPiecesInGame) where
 
 import Case
 import Player
@@ -56,6 +56,9 @@ allPieces board = locateAllPlayerPieces board White ++ locateAllPlayerPieces boa
 -- returns remaining pieces in the board without positions
 piecesInGame:: Board -> [Case]
 piecesInGame board = map (at board) (allPieces board)
+
+allPiecesInGame:: Board -> [(Pos,Case)]
+allPiecesInGame board = zipWith (,) (allPieces board) (piecesInGame board)
 
 -- helper function for the "at" function
 rowAt::Board -> Pos -> [Case]

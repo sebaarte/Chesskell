@@ -73,9 +73,13 @@ executable projet
                     GrammarReader,
                     Token,
                     SaveFile,
-                    Undo
+                    Undo,
+                    MainWindow,
+                    GUIdata,
+                    InputHandler,
+                    Render,
+                    Game
     
-    extra-lib-dirs: libs
 
 
     -- LANGUAGE extensions used by modules in this package.
@@ -91,7 +95,8 @@ executable projet
                         directory,
                         regex-compat,
                         split,
-                        gloss
+                        gloss,
+                        gloss-juicy
 
     -- Directories containing source files.
     hs-source-dirs: app,
